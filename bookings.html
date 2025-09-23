@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bookings</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Theme styles for dynamic gradients and navigation layout -->
+  <!-- Load the unified theme stylesheet with solid header colours -->
+  <link rel="stylesheet" href="theme.css?v=12" />
+  <!-- Update version to bust cache -->
+  <script src="app.js?v=4"></script>
+  <!-- Append cache‑busting query parameter to ensure updated script loads -->
+  <!-- Update version to bust cache -->
+  <!-- Bump version to ensure the updated navigation logic loads -->
+  <script src="bookings.js?v=15"></script>
+  <!-- Theme picker script -->
+  <script src="theme.js"></script>
+  <!-- Dense tables toggle: inserts a checkbox to compact table rows -->
+  <script src="dense-toggle.js?v=2"></script>
+  <!-- Dashboard bar script: provides a collapsible bottom panel with summary charts on all pages -->
+  <script src="dashboard-bar.js?v=7"></script>
+  <!-- Header controls script: adds first/last show selectors and date picker to pages that
+       do not manage schedules directly.  Populates the controls and updates
+       ShowtimeState when changed.  Without this script the global selectors on
+       the Bookings page remain empty. -->
+  <script src="header-controls.js?v=1"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <nav class="nav-wrap grad-nav px-4 py-3">
+    <!-- First row: navigation links.  Keep anchors together on one line. -->
+    <div class="nav-links flex flex-nowrap items-center gap-2">
+      <a href="index.html" class="nav-link hover:bg-blue-700">Home</a>
+      <a href="aud.html" class="nav-link hover:bg-blue-700">Auditoriums</a>
+      <a href="bookings.html" class="nav-link hover:bg-blue-700 font-bold">Bookings</a>
+      <a href="prime.html" class="nav-link hover:bg-blue-700">Prime</a>
+      <!-- Remove the separate schedule list tab and rename the grid link to Schedule -->
+      <a href="schedule-grid.html" class="nav-link hover:bg-blue-700">Schedule</a>
+      <a href="gantt.html" class="nav-link hover:bg-blue-700">Gantt</a>
+      <a href="dashboard.html" class="nav-link hover:bg-blue-700">Dashboard</a>
+      <a href="audit.html" class="nav-link hover:bg-blue-700">Audit</a>
+    </div>
+    <!-- Second row: date/time controls.  Include a placeholder to reserve space
+         for the highlight dropdown even though the bookings page hides it. -->
+    <div class="nav-controls flex flex-wrap items-center gap-3 w-full mt-2">
+      <span id="filmHighlightPlaceholder"></span>
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>First</span>
+        <select id="firstShowGlobalSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>Last</span>
+        <select id="lastShowGlobalSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>Date</span>
+        <div class="flex items-center">
+          <button id="prevDateGlobalBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-l bg-white text-gray-800" title="Previous day">&larr;</button>
+          <input type="text" id="scheduleDateGlobal" placeholder="MM/DD/YYYY" class="border-t border-b border-gray-300 px-2 py-1 text-sm text-gray-800" />
+          <button id="nextDateGlobalBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-r bg-white text-gray-800" title="Next day">&rarr;</button>
+        </div>
+      </label>
+      <button id="copyScheduleGlobalBtn" onclick="openCopyPanel(this, 'scheduleDateGlobal')" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Copy</button>
+    </div>
+    <!-- Swatches removed from the navigation bar to free up space for future controls -->
+  </nav>
+  <!-- Colour swatch row: display below the navigation bar for all pages -->
+  <!-- Right‑align the colour swatches under the navigation bar -->
+  <div class="flex flex-wrap gap-2 px-4 py-2 justify-end">
+    <button class="swatch" data-brand-from="#3b82f6" data-brand-to="#4f46e5" style="background-image: linear-gradient(to right,#3b82f6,#4f46e5);"></button>
+    <button class="swatch" data-brand-from="#1e3a8a" data-brand-to="#312e81" style="background-image: linear-gradient(to right,#1e3a8a,#312e81);"></button>
+    <button class="swatch" data-brand-from="#ff8a00" data-brand-to="#ff6a00" style="background-image: linear-gradient(to right,#ff8a00,#ff6a00);"></button>
+    <button class="swatch" data-brand-from="#c2410c" data-brand-to="#a53e0a" style="background-image: linear-gradient(to right,#c2410c,#a53e0a);"></button>
+    <button class="swatch" data-brand-from="#10b981" data-brand-to="#22c55e" style="background-image: linear-gradient(to right,#10b981,#22c55e);"></button>
+    <button class="swatch" data-brand-from="#065f46" data-brand-to="#064e3b" style="background-image: linear-gradient(to right,#065f46,#064e3b);"></button>
+    <button class="swatch" data-brand-from="#8b5cf6" data-brand-to="#7c3aed" style="background-image: linear-gradient(to right,#8b5cf6,#7c3aed);"></button>
+    <button class="swatch" data-brand-from="#6d28d9" data-brand-to="#4c1d95" style="background-image: linear-gradient(to right,#6d28d9,#4c1d95);"></button>
+  </div>
+  <!-- Expand to full width and reserve space for the Start‑time Order panel (28rem).
+       Removing the max‑width eliminates dead space on the left. -->
+  <!-- Remove reserved right margin so the table can use the full width when the order panel is hidden -->
+  <div class="px-6 pt-4 pb-6">
+    <h2 class="text-xl font-semibold mb-4">Bookings</h2>
+    <!-- Add and Clear buttons: the Add button remains in the markup for compatibility but is hidden via JS.  -->
+    <!-- Standardise button sizing across pages -->
+    <button id="addBookingBtn" class="mb-3 px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Add Booking</button>
+    <button id="clearBookingsBtn" class="mb-3 ml-2 px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear Bookings</button>
+    <div class="overflow-x-auto">
+      <!-- Wrap the bookings table in a card-table container for card-like styling -->
+      <div class="card-table">
+      <table>
+        <!-- Apply grad-header so bookings table header uses a solid colour matching the theme -->
+        <thead class="grad-header">
+        <tr>
+          <!-- Reorder columns so that Slot appears first.  Widths remain unchanged. -->
+          <th class="px-2 py-1 text-left w-10"><span class="sr-only">Delete</span></th>
+          <th class="px-2 py-1 text-left">Slot</th>
+          <th class="px-2 py-1 text-left">Film Title</th>
+          <th class="px-2 py-1 text-left">Format</th>
+          <th class="px-2 py-1 text-left">Runtime</th>
+          <th class="px-2 py-1 text-left">Trailer</th>
+          <th class="px-2 py-1 text-left">Priority</th>
+          <th class="px-2 py-1 text-left">Rating</th>
+          <th class="px-2 py-1 text-left">Notes &#8211; Policy/Comments</th>
+          <th class="px-2 py-1 text-left">Week&#35;</th>
+          <th class="px-2 py-1 text-left">Clean&nbsp;up</th>
+        </tr>
+        </thead>
+        <tbody id="bookingBody">
+        <!-- rows inserted via JS -->
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+  <!-- Include order panel script to provide collapsible order view on this page -->
+  <!-- Include order panel overlay script with cache busting parameter -->
+  <!-- Use latest version of order-panel script -->
+  <script src="order-panel.js?v=9"></script>
+</body>
+</html>
