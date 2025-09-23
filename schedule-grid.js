@@ -1054,6 +1054,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const hm = parseTimeString(inp.value);
             if (hm) {
               ShowtimeState.addManualShow(row.rowId, hm);
+              // Clear the input so subsequent synthetic blur/change events do not
+              // reparse the same value and create duplicate manual shows.
+              inp.value = '';
               // Defer re-render if a keyboard navigation is in progress; nav handler will re-render.
               if (!gridNavInProgress) {
                 renderAll();
