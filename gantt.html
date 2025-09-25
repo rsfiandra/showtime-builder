@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gantt Timeline</title>
+  <!-- Tailwind CSS for rapid styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Theme styles for dynamic gradients and navigation layout -->
+  <link rel="stylesheet" href="theme.css?v=13" />
+  <!-- Core application state and helpers -->
+  <!-- Update version to bust cache -->
+  <script src="app.js?v=6"></script>
+  <!-- Order panel overlay script to provide a collapsible start‑time order view -->
+  <script src="order-panel.js?v=13"></script>
+  <!-- Gantt timeline logic -->
+  <!-- Increment version to bust cache and load updated script with drop and post‑midnight width fix -->
+  <!-- Updated to v7 for bug fix: cancel click-to-insert mode when dragging a show -->
+  <script src="gantt.js?v=7"></script>
+  <!-- Theme picker script -->
+  <script src="theme.js"></script>
+  <!-- Dense tables toggle: inserts a checkbox into the navigation controls for compact tables -->
+  <script src="dense-toggle.js?v=1"></script>
+  <!-- Dashboard bar script: provides a collapsible bottom panel with summary charts on all pages -->
+  <script src="dashboard-bar.js?v=5"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <nav class="nav-wrap grad-nav px-4 py-3">
+    <!-- First row: navigation links.  Keep all navigation anchors together so
+         they remain on a single line.  The date/time controls will appear
+         on a second row below. -->
+    <div class="nav-links flex flex-nowrap items-center gap-2">
+      <a href="index.html" class="nav-link hover:bg-blue-700">Home</a>
+      <a href="aud.html" class="nav-link hover:bg-blue-700">Auditoriums</a>
+      <a href="bookings.html" class="nav-link hover:bg-blue-700">Bookings</a>
+      <a href="prime.html" class="nav-link hover:bg-blue-700">Prime</a>
+      <a href="schedule-grid.html" class="nav-link hover:bg-blue-700">Schedule</a>
+      <a href="gantt.html" class="nav-link hover:bg-blue-700 font-bold">Gantt</a>
+      <!-- Add missing Dashboard link so the tab order matches other pages -->
+      <a href="dashboard.html" class="nav-link hover:bg-blue-700">Dashboard</a>
+      <a href="audit.html" class="nav-link hover:bg-blue-700">Audit</a>
+    </div>
+    <!-- Second row: date/time controls.  Wrap onto its own line and take the
+         full width of the nav so that the navigation links above never
+         overflow the viewport. -->
+    <div class="nav-controls flex flex-wrap items-center gap-3 w-full mt-2">
+      <!-- Placeholder for the film highlight dropdown injected by app.js.  Keeping this span ensures
+           the highlight select appears consistently across pages. -->
+      <span id="filmHighlightPlaceholder"></span>
+      <!-- First and last show selectors for the Gantt timeline -->
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>First</span>
+        <select id="firstShowGanttSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>Last</span>
+        <select id="lastShowGanttSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <!-- Date selector with previous/next buttons -->
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>Date</span>
+        <div class="flex items-center">
+          <button id="prevDateGanttBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-l bg-white text-gray-800" title="Previous day">&larr;</button>
+          <input type="text" id="scheduleDateGantt" placeholder="MM/DD/YYYY" class="border-t border-b border-gray-300 px-2 py-1 text-sm text-gray-800" />
+          <button id="nextDateGanttBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-r bg-white text-gray-800" title="Next day">&rarr;</button>
+        </div>
+      </label>
+      <!-- Always display Clear Times and Copy buttons so controls are consistent across tabs -->
+      <button id="clearTimesGanttBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear Times</button>
+      <button id="copyScheduleGanttBtn" onclick="openCopyPanel(this, 'scheduleDateGantt')" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Copy</button>
+    </div>
+    <!-- Swatches removed from the navigation bar; they will be displayed in a row below the header -->
+  </nav>
+  <!-- Colour swatches row: place below the header so the navigation bar has space for date/time controls -->
+  <!-- Right‑align the colour swatches under the navigation bar -->
+  <div class="flex flex-wrap gap-2 px-4 py-2 justify-end">
+    <button class="swatch" data-brand-from="#3b82f6" data-brand-to="#4f46e5" style="background-image: linear-gradient(to right,#3b82f6,#4f46e5);"></button>
+    <button class="swatch" data-brand-from="#1e3a8a" data-brand-to="#312e81" style="background-image: linear-gradient(to right,#1e3a8a,#312e81);"></button>
+    <button class="swatch" data-brand-from="#ff8a00" data-brand-to="#ff6a00" style="background-image: linear-gradient(to right,#ff8a00,#ff6a00);"></button>
+    <button class="swatch" data-brand-from="#c2410c" data-brand-to="#a53e0a" style="background-image: linear-gradient(to right,#c2410c,#a53e0a);"></button>
+    <button class="swatch" data-brand-from="#10b981" data-brand-to="#22c55e" style="background-image: linear-gradient(to right,#10b981,#22c55e);"></button>
+    <button class="swatch" data-brand-from="#065f46" data-brand-to="#064e3b" style="background-image: linear-gradient(to right,#065f46,#064e3b);"></button>
+    <button class="swatch" data-brand-from="#8b5cf6" data-brand-to="#7c3aed" style="background-image: linear-gradient(to right,#8b5cf6,#7c3aed);"></button>
+    <button class="swatch" data-brand-from="#6d28d9" data-brand-to="#4c1d95" style="background-image: linear-gradient(to right,#6d28d9,#4c1d95);"></button>
+  </div>
+  <!-- Expand to full width and reserve space for the Start‑time Order panel (28rem). -->
+  <!-- Use consistent padding (p-6) across pages so that the timeline starts at the same height as other tables -->
+  <!-- Remove reserved right margin so the timeline can use the full width when the order panel is hidden -->
+  <div class="px-6 pt-4 pb-6">
+    <!-- Film selection tray: allows dragging films onto the timeline. Sticky at the top so it stays visible while scrolling -->
+    <div id="filmTray" class="sticky top-0 z-20 bg-white/90 backdrop-blur border-b p-2 flex flex-wrap gap-2"></div>
+    <h2 class="text-xl font-semibold mb-3">Gantt Timeline</h2>
+    <!-- The date selector has been moved into the navigation bar. -->
+    <div class="overflow-x-auto">
+      <!-- Container for the Gantt timeline. Rows and bars will be injected via JS.  Wrap
+           the timeline in a card frame to match other tables. -->
+      <div id="ganttContainer" class="relative rounded-xl overflow-hidden ring-1 ring-slate-200 shadow bg-white"></div>
+    </div>
+  </div>
+</body>
+</html>

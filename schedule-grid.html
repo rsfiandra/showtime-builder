@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Schedule Grid</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Theme styles for dynamic gradients and navigation layout -->
+  <!-- Use the latest theme version to ensure card-table styles are available -->
+  <!-- Use the unified theme stylesheet for consistent header styling -->
+  <!-- Bump the theme version to bust browser caches after CSS updates -->
+  <!-- Bump version to ensure the updated header override loads -->
+  <link rel="stylesheet" href="theme.css?v=13" />
+  <!-- Update version to bust cache -->
+  <!-- Bump cache buster to load updated app logic -->
+  <script src="app.js?v=6"></script>
+  <!-- Append a cache‑busting query parameter to ensure the latest schedule-grid.js is loaded -->
+  <!-- Append cache-busting version to ensure updated script loads -->
+  <!-- Increment cache buster to force browsers to load the latest script -->
+  <!-- Bump cache buster for schedule-grid.js to load updated navigation logic -->
+  <!-- Load the latest schedule grid script; bump the version to bust caches if needed -->
+  <!-- Updated script version to apply downtime highlighting changes -->
+  <!-- Bump cache buster to load latest schedule-grid logic (aligned start/end times) -->
+  <script src="schedule-grid.js?v=26"></script>
+  <!-- Include order panel overlay script with cache buster to provide a collapsible start‑time order view on this page -->
+  <!-- Increment cache buster for the order panel as well -->
+  <script src="order-panel.js?v=13"></script>
+  <!-- Theme picker script -->
+  <script src="theme.js"></script>
+  <!-- Dense tables toggle: inserts a checkbox into the navigation controls for compact tables -->
+  <script src="dense-toggle.js?v=1"></script>
+  <!-- Dashboard bar script: provides a collapsible bottom panel with summary charts on all pages -->
+  <script src="dashboard-bar.js?v=5"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <nav class="nav-wrap grad-nav px-4 py-3">
+    <!-- First row: navigation links.  Keep all navigation anchors together
+         so they remain on a single line.  The highlight film selector and
+         other controls are moved into a second row below. -->
+    <div class="nav-links flex flex-nowrap items-center gap-2">
+      <a href="index.html" class="nav-link hover:bg-blue-700">Home</a>
+      <a href="aud.html" class="nav-link hover:bg-blue-700">Auditoriums</a>
+      <a href="bookings.html" class="nav-link hover:bg-blue-700">Bookings</a>
+      <a href="prime.html" class="nav-link hover:bg-blue-700">Prime</a>
+      <!-- Rename the grid link to Schedule and add a Gantt link -->
+      <a href="schedule-grid.html" class="nav-link hover:bg-blue-700 font-bold">Schedule</a>
+      <a href="gantt.html" class="nav-link hover:bg-blue-700">Gantt</a>
+      <a href="dashboard.html" class="nav-link hover:bg-blue-700">Dashboard</a>
+      <a href="audit.html" class="nav-link hover:bg-blue-700">Audit</a>
+    </div>
+    <!-- Second row: controls and highlight film selector.  Wrap onto its own
+         line and take the full width of the nav so that the navigation
+         links above never overflow the viewport.  The filmHighlightPlaceholder
+         span acts as a mount point for the film highlight dropdown which
+         app.js injects. -->
+    <div class="nav-controls flex flex-wrap items-center gap-3 w-full mt-2">
+      <!-- Placeholder for the film highlight dropdown.  The script in
+           app.js will insert the select here if present. -->
+      <span id="filmHighlightPlaceholder"></span>
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>First</span>
+        <select id="firstShowSelect" class="appearance-none border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>Last</span>
+        <select id="lastShowSelect" class="appearance-none border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>Date</span>
+        <!-- Surround the date input with previous/next day buttons to allow
+             one‑day adjustments.  The buttons are purely decorative until
+             wired up via JS in schedule-grid.js. -->
+        <div class="flex items-center">
+          <button id="prevDateGridBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-l bg-white text-gray-800" title="Previous day">&larr;</button>
+          <input type="text" id="scheduleDateGrid" placeholder="MM/DD/YYYY" class="border-t border-b border-gray-300 px-2 py-1 text-sm text-gray-800" />
+          <button id="nextDateGridBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-r bg-white text-gray-800" title="Next day">&rarr;</button>
+        </div>
+      </label>
+      <!-- Clear times button moved from below the grid into the header for a consistent layout across pages -->
+      <button id="clearTimesGridBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear Times</button>
+      <!-- Copy schedule button: allows copying the current schedule to multiple dates -->
+      <button id="copyScheduleGridBtn" onclick="openCopyPanel(this, 'scheduleDateGrid')" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Copy</button>
+    </div>
+    <!-- Swatches have been removed from the navigation bar.  They will be displayed below the header -->
+  </nav>
+  <!-- Theme colour swatches row: position below the header.  This row provides eight
+       gradient options consistent with other pages.  It uses flex wrap so that
+       swatches wrap on smaller screens. -->
+  <!-- Right‑align the colour swatches under the navigation bar -->
+  <div class="flex flex-wrap gap-2 px-4 py-2 justify-end">
+    <button class="swatch" data-brand-from="#3b82f6" data-brand-to="#4f46e5" style="background-image: linear-gradient(to right,#3b82f6,#4f46e5);"></button>
+    <button class="swatch" data-brand-from="#1e3a8a" data-brand-to="#312e81" style="background-image: linear-gradient(to right,#1e3a8a,#312e81);"></button>
+    <button class="swatch" data-brand-from="#ff8a00" data-brand-to="#ff6a00" style="background-image: linear-gradient(to right,#ff8a00,#ff6a00);"></button>
+    <button class="swatch" data-brand-from="#c2410c" data-brand-to="#a53e0a" style="background-image: linear-gradient(to right,#c2410c,#a53e0a);"></button>
+    <button class="swatch" data-brand-from="#10b981" data-brand-to="#22c55e" style="background-image: linear-gradient(to right,#10b981,#22c55e);"></button>
+    <button class="swatch" data-brand-from="#065f46" data-brand-to="#064e3b" style="background-image: linear-gradient(to right,#065f46,#064e3b);"></button>
+    <button class="swatch" data-brand-from="#8b5cf6" data-brand-to="#7c3aed" style="background-image: linear-gradient(to right,#8b5cf6,#7c3aed);"></button>
+    <button class="swatch" data-brand-from="#6d28d9" data-brand-to="#4c1d95" style="background-image: linear-gradient(to right,#6d28d9,#4c1d95);"></button>
+  </div>
+  <!-- Expand to full width and reserve space for the Start‑time Order panel (28rem). -->
+  <!-- Use consistent padding (p-6) across pages so that the grid starts at the same height as other tables -->
+  <!-- Remove reserved right margin so the grid can use the full width when the order panel is hidden -->
+  <div class="px-6 pt-4 pb-6">
+    <!-- Moved first/last show and date selectors into the navigation bar.  The row of action buttons
+         remains here below the heading. -->
+    <div class="flex flex-wrap items-center gap-3 mb-3">
+      <button id="addRowBtn" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Add Row</button>
+      <button id="toggleEndBtn" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Hide End Times</button>
+      <button id="undoBtn" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Undo</button>
+      <button id="sortRowsBtn" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Sort Auds</button>
+    </div>
+    <div class="overflow-x-auto">
+      <!-- Wrap the schedule table in a card-table container to apply
+           card-like styling (rounded border, zebra striping, sticky header)
+           consistent with the Auditoriums and Bookings pages. -->
+      <!-- Apply the dense-schedule class to reduce row height on the schedule grid -->
+      <div class="card-table dense-schedule" data-nav-grid>
+        <table>
+          <!-- Use a gradient on the header to more closely match the original Showtime Builder styling -->
+          <thead id="gridHead" class="grad-header text-sm">
+            <!-- header inserted via JS -->
+          </thead>
+          <tbody id="gridBody">
+            <!-- rows inserted via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="text-xs text-gray-600 mt-2">Type a time (e.g., 7a or 705a) in an empty cell to add a manual show at that time. Changing a time only affects that show, not the entire row. Use Undo to revert the most recent change.</p>
+  </div>
+</body>
+</html>
