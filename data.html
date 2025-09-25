@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Import/Export</title>
+  <!-- Tailwind CSS for rapid styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Theme styles for dynamic gradients and navigation layout -->
+  <link rel="stylesheet" href="theme.css?v=13" />
+  <!-- Global application state -->
+  <!-- Update version to bust cache -->
+  <script src="app.js?v=6"></script>
+  <!-- Theme picker script -->
+  <script src="theme.js"></script>
+  <!-- Dense tables toggle: inserts a checkbox into the navigation controls for compact tables -->
+  <script src="dense-toggle.js?v=1"></script>
+  <!-- Dashboard bar script: provides a collapsible bottom panel with summary charts on all pages -->
+  <script src="dashboard-bar.js?v=5"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <!-- Navigation bar; mirrors other pages and includes Data link -->
+  <nav class="nav-wrap grad-nav px-4 py-3">
+    <!-- First row: navigation links -->
+    <div class="nav-links flex flex-nowrap items-center gap-2">
+      <a href="index.html" class="nav-link hover:bg-blue-700">Home</a>
+      <a href="aud.html" class="nav-link hover:bg-blue-700">Auditoriums</a>
+      <a href="bookings.html" class="nav-link hover:bg-blue-700">Bookings</a>
+      <a href="prime.html" class="nav-link hover:bg-blue-700">Prime</a>
+      <a href="schedule-grid.html" class="nav-link hover:bg-blue-700">Schedule</a>
+      <a href="gantt.html" class="nav-link hover:bg-blue-700">Gantt</a>
+      <a href="dashboard.html" class="nav-link hover:bg-blue-700">Dashboard</a>
+      <a href="audit.html" class="nav-link hover:bg-blue-700">Audit</a>
+      <a href="data.html" class="nav-link hover:bg-blue-700 font-bold">Data</a>
+    </div>
+    <!-- Second row: placeholder only.  Reserve space for highlight dropdown -->
+    <div class="nav-controls flex flex-wrap items-center gap-3 w-full mt-2">
+      <span id="filmHighlightPlaceholder"></span>
+    </div>
+  </nav>
+
+  <!-- Theme colour swatches row: display below the navigation bar to allow theme selection on the data page.  Align to the right for consistency with other pages. -->
+  <div class="flex flex-wrap gap-2 px-4 py-2 justify-end">
+    <button class="swatch" data-brand-from="#3b82f6" data-brand-to="#4f46e5" style="background-image: linear-gradient(to right,#3b82f6,#4f46e5);"></button>
+    <button class="swatch" data-brand-from="#1e3a8a" data-brand-to="#312e81" style="background-image: linear-gradient(to right,#1e3a8a,#312e81);"></button>
+    <button class="swatch" data-brand-from="#ff8a00" data-brand-to="#ff6a00" style="background-image: linear-gradient(to right,#ff8a00,#ff6a00);"></button>
+    <button class="swatch" data-brand-from="#c2410c" data-brand-to="#a53e0a" style="background-image: linear-gradient(to right,#c2410c,#a53e0a);"></button>
+    <button class="swatch" data-brand-from="#10b981" data-brand-to="#22c55e" style="background-image: linear-gradient(to right,#10b981,#22c55e);"></button>
+    <button class="swatch" data-brand-from="#065f46" data-brand-to="#064e3b" style="background-image: linear-gradient(to right,#065f46,#064e3b);"></button>
+    <button class="swatch" data-brand-from="#8b5cf6" data-brand-to="#7c3aed" style="background-image: linear-gradient(to right,#8b5cf6,#7c3aed);"></button>
+    <button class="swatch" data-brand-from="#6d28d9" data-brand-to="#4c1d95" style="background-image: linear-gradient(to right,#6d28d9,#4c1d95);"></button>
+  </div>
+  <!-- Expand to full width and reserve space for the Start‑time Order panel so the page aligns with other tabs. -->
+  <!-- Remove reserved right margin so the content can use the full width when the order panel is hidden -->
+  <div class="px-6 pt-4 pb-6">
+    <h2 class="text-xl font-semibold mb-4">Data Export / Import</h2>
+    <p class="mb-4">Export your current schedule to a JSON or CSV file, or import a previously saved JSON file to restore your schedule.</p>
+    <div class="space-y-4">
+      <!-- Standardise button sizing across pages -->
+      <button id="exportJsonBtn" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Export JSON</button>
+      <button id="exportCsvBtn" class="px-3 py-1 bg-green-700 text-white rounded-lg hover:bg-green-800 text-sm">Export CSV (shows)</button>
+      <div class="flex flex-col gap-2">
+        <div>
+          <label class="mr-2 font-medium" for="importFileInput">Import JSON (file):</label>
+          <input id="importFileInput" type="file" accept=".json" class="border border-gray-300 rounded-lg p-1" />
+        </div>
+        <div>
+          <label class="block font-medium mb-1" for="importText">Import JSON (paste):</label>
+          <textarea id="importText" rows="4" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Paste JSON here..."></textarea>
+          <button id="importTextBtn" class="mt-2 px-3 py-1 bg-purple-700 text-white rounded-lg hover:bg-purple-800 text-sm">Import Pasted JSON</button>
+        </div>
+      </div>
+    </div>
+    <!-- Colour examples section -->
+    <div class="mt-8">
+      <h3 class="text-lg font-semibold mb-2">Theme colour examples</h3>
+      <p class="text-sm text-gray-600 mb-4">Select the gradient swatches below to preview different colour blends before choosing your preferred theme. These examples are purely visual and do not affect the current theme until you click a swatch in the navigation bar.</p>
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <!-- Blue gradients -->
+        <div class="p-3 border rounded-lg shadow bg-white flex flex-col items-center">
+          <div class="w-full h-8 rounded mb-1" style="background-image: linear-gradient(to right, #1e40af, #3730a3);"></div>
+          <div class="text-xs font-mono text-center">Classic Blue<br/><span class="text-gray-500">#1e40af → #3730a3</span></div>
+        </div>
+        <div class="p-3 border rounded-lg shadow bg-white flex flex-col items-center">
+          <div class="w-full h-8 rounded mb-1" style="background-image: linear-gradient(to right, #1e3a8a, #312e81);"></div>
+          <div class="text-xs font-mono text-center">Sapphire Blue<br/><span class="text-gray-500">#1e3a8a → #312e81</span></div>
+        </div>
+        <div class="p-3 border rounded-lg shadow bg-white flex flex-col items-center">
+          <div class="w-full h-8 rounded mb-1" style="background-image: linear-gradient(to right, #0284c7, #1e3a8a);"></div>
+          <div class="text-xs font-mono text-center">Sky Blue<br/><span class="text-gray-500">#0284c7 → #1e3a8a</span></div>
+        </div>
+        <!-- Orange gradients -->
+        <div class="p-3 border rounded-lg shadow bg-white flex flex-col items-center">
+          <div class="w-full h-8 rounded mb-1" style="background-image: linear-gradient(to right, #ea580c, #c2410c);"></div>
+          <div class="text-xs font-mono text-center">Warm Orange<br/><span class="text-gray-500">#ea580c → #c2410c</span></div>
+        </div>
+        <div class="p-3 border rounded-lg shadow bg-white flex flex-col items-center">
+          <div class="w-full h-8 rounded mb-1" style="background-image: linear-gradient(to right, #c05621, #a44b2d);"></div>
+          <div class="text-xs font-mono text-center">Rusty Orange<br/><span class="text-gray-500">#c05621 → #a44b2d</span></div>
+        </div>
+        <!-- Green gradients -->
+        <div class="p-3 border rounded-lg shadow bg-white flex flex-col items-center">
+          <div class="w-full h-8 rounded mb-1" style="background-image: linear-gradient(to right, #059669, #047857);"></div>
+          <div class="text-xs font-mono text-center">Emerald Forest<br/><span class="text-gray-500">#059669 → #047857</span></div>
+        </div>
+        <div class="p-3 border rounded-lg shadow bg-white flex flex-col items-center">
+          <div class="w-full h-8 rounded mb-1" style="background-image: linear-gradient(to right, #047857, #065f46);"></div>
+          <div class="text-xs font-mono text-center">Deep Green<br/><span class="text-gray-500">#047857 → #065f46</span></div>
+        </div>
+        <!-- Purple gradients -->
+        <div class="p-3 border rounded-lg shadow bg-white flex flex-col items-center">
+          <div class="w-full h-8 rounded mb-1" style="background-image: linear-gradient(to right, #7e22ce, #6d28d9);"></div>
+          <div class="text-xs font-mono text-center">Deep Violet<br/><span class="text-gray-500">#7e22ce → #6d28d9</span></div>
+        </div>
+        <div class="p-3 border rounded-lg shadow bg-white flex flex-col items-center">
+          <div class="w-full h-8 rounded mb-1" style="background-image: linear-gradient(to right, #5b21b6, #4c1d95);"></div>
+          <div class="text-xs font-mono text-center">Royal Purple<br/><span class="text-gray-500">#5b21b6 → #4c1d95</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Include order panel overlay script so the Start‑time Order panel is available -->
+  <script src="order-panel.js?v=13"></script>
+  <!-- Data export/import logic -->
+  <script src="data.js"></script>
+</body>
+</html>

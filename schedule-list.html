@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Schedule</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Theme styles for dynamic gradients and navigation layout -->
+  <link rel="stylesheet" href="theme.css?v=13" />
+  <!-- Update version to bust cache -->
+  <script src="app.js?v=6"></script>
+  <script src="schedule-list.js"></script>
+  <!-- Theme picker script -->
+  <script src="theme.js"></script>
+  <!-- Dense tables toggle: inserts a checkbox into the navigation controls for compact tables -->
+  <script src="dense-toggle.js?v=1"></script>
+  <!-- Dashboard bar script: provides a collapsible bottom panel with summary charts on all pages -->
+  <script src="dashboard-bar.js?v=5"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <nav class="nav-wrap grad-nav px-4 py-3 items-center">
+    <a href="index.html" class="nav-link hover:bg-blue-700">Home</a>
+    <a href="aud.html" class="nav-link hover:bg-blue-700">Auditoriums</a>
+    <a href="bookings.html" class="nav-link hover:bg-blue-700">Bookings</a>
+    <a href="prime.html" class="nav-link hover:bg-blue-700">Prime</a>
+    <a href="schedule-list.html" class="nav-link hover:bg-blue-700 font-bold">Schedule</a>
+    <a href="schedule-grid.html" class="nav-link hover:bg-blue-700">Grid</a>
+    <a href="gantt.html" class="nav-link hover:bg-blue-700">Gantt</a>
+    <a href="audit.html" class="nav-link hover:bg-blue-700">Audit</a>
+    <!-- Removed Data tab; data import/export lives on the Home page -->
+    <!-- Insert the date selector into the navigation bar so the user can change days from any schedule view -->
+    <div class="flex flex-wrap items-center gap-3 ml-4">
+      <!-- First/Last show selectors mirror those on the grid and prime pages.  Changing
+           these will update the global firstShowHM/lastShowHM values and
+           re‑render the list. -->
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>First</span>
+        <select id="firstShowListSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>Last</span>
+        <select id="lastShowListSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <!-- Date selector with previous/next buttons -->
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>Date</span>
+        <div class="flex items-center">
+          <button id="prevDateListBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-l bg-white text-gray-800" title="Previous day">&larr;</button>
+          <input type="text" id="scheduleDateList" placeholder="MM/DD/YYYY" class="border-t border-b border-gray-300 px-2 py-1 text-sm text-gray-800" />
+          <button id="nextDateListBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-r bg-white text-gray-800" title="Next day">&rarr;</button>
+        </div>
+      </label>
+      <!-- Copy schedule button for list view -->
+      <button id="copyScheduleListBtn" onclick="openCopyPanel(this, 'scheduleDateList')" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Copy</button>
+    </div>
+    <!-- Swatches removed from navigation bar; they will appear below the header -->
+  </nav>
+  <!-- Theme colour swatches row: display below the navigation bar for consistency across pages -->
+  <!-- Right‑align the colour swatches under the navigation bar -->
+  <div class="flex flex-wrap gap-2 px-4 py-2 justify-end">
+    <button class="swatch" data-brand-from="#3b82f6" data-brand-to="#4f46e5" style="background-image: linear-gradient(to right,#3b82f6,#4f46e5);"></button>
+    <button class="swatch" data-brand-from="#1e3a8a" data-brand-to="#312e81" style="background-image: linear-gradient(to right,#1e3a8a,#312e81);"></button>
+    <button class="swatch" data-brand-from="#ff8a00" data-brand-to="#ff6a00" style="background-image: linear-gradient(to right,#ff8a00,#ff6a00);"></button>
+    <button class="swatch" data-brand-from="#c2410c" data-brand-to="#a53e0a" style="background-image: linear-gradient(to right,#c2410c,#a53e0a);"></button>
+    <button class="swatch" data-brand-from="#10b981" data-brand-to="#22c55e" style="background-image: linear-gradient(to right,#10b981,#22c55e);"></button>
+    <button class="swatch" data-brand-from="#065f46" data-brand-to="#064e3b" style="background-image: linear-gradient(to right,#065f46,#064e3b);"></button>
+    <button class="swatch" data-brand-from="#8b5cf6" data-brand-to="#7c3aed" style="background-image: linear-gradient(to right,#8b5cf6,#7c3aed);"></button>
+    <button class="swatch" data-brand-from="#6d28d9" data-brand-to="#4c1d95" style="background-image: linear-gradient(to right,#6d28d9,#4c1d95);"></button>
+  </div>
+  <!-- Expand to full width and reserve space for the Start‑time Order panel (28rem). -->
+  <!-- Remove reserved right margin so the table can use the full width when the order panel is hidden -->
+  <div class="px-6 pt-4 pb-6">
+    <h2 class="text-xl font-semibold mb-4">Schedule</h2>
+    <!-- The date selector has been relocated into the navigation bar. -->
+    <!-- Use table-fixed so the column widths are consistent and the list doesn’t stretch when the order panel toggles -->
+    <table class="min-w-full table-fixed w-full rounded-xl overflow-hidden ring-1 ring-slate-200 shadow bg-white">
+      <thead class="grad-header text-xs">
+        <tr>
+          <th class="px-2 py-1 text-left">Start</th>
+          <th class="px-2 py-1 text-left">End</th>
+          <th class="px-2 py-1 text-left">Auditorium</th>
+          <th class="px-2 py-1 text-left">Film</th>
+          <th class="px-2 py-1 text-left">Slot</th>
+          <th class="px-2 py-1 text-left">Source</th>
+        </tr>
+      </thead>
+      <tbody id="scheduleBody" class="divide-y divide-gray-200 odd:bg-white even:bg-gray-50 text-sm">
+        <!-- rows inserted via JS -->
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

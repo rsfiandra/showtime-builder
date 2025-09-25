@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Theme CSS with cache buster -->
+  <!-- Load the unified theme stylesheet -->
+  <link rel="stylesheet" href="theme.css?v=13" />
+  <!-- Base app state logic -->
+  <script src="app.js?v=6"></script>
+  <!-- Chart.js library for charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Dashboard script with cache buster -->
+  <script src="dashboard.js?v=5"></script>
+  <!-- Dense tables toggle: inserts a checkbox into the navigation controls for compact tables -->
+  <script src="dense-toggle.js?v=1"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <!-- Navigation bar -->
+  <nav class="nav-wrap grad-nav px-4 py-3">
+    <!-- First row: navigation links.  Keep all navigation anchors together so
+         they remain on a single line.  The film highlight selector and
+         date/time controls will appear on a second row below. -->
+    <div class="nav-links flex flex-nowrap items-center gap-2">
+      <a href="index.html" class="nav-link hover:bg-blue-700">Home</a>
+      <a href="aud.html" class="nav-link hover:bg-blue-700">Auditoriums</a>
+      <a href="bookings.html" class="nav-link hover:bg-blue-700">Bookings</a>
+      <a href="prime.html" class="nav-link hover:bg-blue-700">Prime</a>
+      <a href="schedule-grid.html" class="nav-link hover:bg-blue-700">Schedule</a>
+      <a href="gantt.html" class="nav-link hover:bg-blue-700">Gantt</a>
+      <a href="dashboard.html" class="nav-link hover:bg-blue-700 font-bold">Dashboard</a>
+      <a href="audit.html" class="nav-link hover:bg-blue-700">Audit</a>
+    </div>
+    <!-- Second row: film highlight placeholder and global controls.  Wrap onto
+         its own line and take the full width of the nav so that the
+         navigation links above never overflow the viewport. -->
+    <div class="nav-controls flex flex-wrap items-center gap-3 w-full mt-2">
+      <!-- Placeholder for the film highlight dropdown injected by app.js -->
+      <span id="filmHighlightPlaceholder"></span>
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>First</span>
+        <!-- Use global IDs so header-controls.js manages these selectors -->
+        <select id="firstShowGlobalSelect" class="appearance-none border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>Last</span>
+        <select id="lastShowGlobalSelect" class="appearance-none border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>Date</span>
+        <div class="flex items-center">
+          <button id="prevDateGlobalBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-l bg-white text-gray-800" title="Previous day">&larr;</button>
+          <input type="text" id="scheduleDateGlobal" placeholder="MM/DD/YYYY" class="border-t border-b border-gray-300 px-2 py-1 text-sm text-gray-800" />
+          <button id="nextDateGlobalBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-r bg-white text-gray-800" title="Next day">&rarr;</button>
+        </div>
+      </label>
+    </div>
+  </nav>
+  <!-- Swatch selector row for theme colours -->
+  <div class="flex flex-wrap gap-2 px-4 py-2 justify-end">
+    <button class="swatch" data-brand-from="#3b82f6" data-brand-to="#4f46e5" style="background-image: linear-gradient(to right,#3b82f6,#4f46e5);"></button>
+    <button class="swatch" data-brand-from="#1e3a8a" data-brand-to="#312e81" style="background-image: linear-gradient(to right,#1e3a8a,#312e81);"></button>
+    <button class="swatch" data-brand-from="#ff8a00" data-brand-to="#ff6a00" style="background-image: linear-gradient(to right,#ff8a00,#ff6a00);"></button>
+    <button class="swatch" data-brand-from="#c2410c" data-brand-to="#a53e0a" style="background-image: linear-gradient(to right,#c2410c,#a53e0a);"></button>
+    <button class="swatch" data-brand-from="#10b981" data-brand-to="#22c55e" style="background-image: linear-gradient(to right,#10b981,#22c55e);"></button>
+    <button class="swatch" data-brand-from="#065f46" data-brand-to="#064e3b" style="background-image: linear-gradient(to right,#065f46,#064e3b);"></button>
+    <button class="swatch" data-brand-from="#8b5cf6" data-brand-to="#7c3aed" style="background-image: linear-gradient(to right,#8b5cf6,#7c3aed);"></button>
+    <button class="swatch" data-brand-from="#6d28d9" data-brand-to="#4c1d95" style="background-image: linear-gradient(to right,#6d28d9,#4c1d95);"></button>
+  </div>
+  <div class="p-6 space-y-8">
+    <h1 class="text-2xl font-bold">Dashboard</h1>
+    <p class="text-sm text-gray-600">Summary charts showing the distribution of showtimes by film, auditorium and start time for the selected date.</p>
+    <!-- Chart containers organised in two rows to prevent individual charts from growing too wide.
+         Each row uses a two‑column grid on medium and larger screens, so charts occupy half the page width.
+         On small screens they stack vertically.  Each canvas has a fixed height to avoid infinite stretching. -->
+    <div class="grid md:grid-cols-2 gap-8">
+      <div class="bg-white shadow rounded-lg p-4">
+        <h2 class="text-lg font-semibold mb-2">Shows by Film</h2>
+        <canvas id="filmChart" height="250" style="max-height:250px;"></canvas>
+      </div>
+      <div class="bg-white shadow rounded-lg p-4">
+        <h2 class="text-lg font-semibold mb-2">Shows by Auditorium</h2>
+        <canvas id="audChart" height="250" style="max-height:250px;"></canvas>
+      </div>
+    </div>
+    <!-- Second row: a wide container for the start and end time distribution charts.  The card
+         spans the full width on medium and larger screens for improved readability.  A separate
+         row below holds the utilisation chart. -->
+    <div class="grid md:grid-cols-1 gap-8 mt-8">
+      <div class="bg-white shadow rounded-lg p-4">
+        <h2 class="text-lg font-semibold mb-2">Start &amp; End Time Distribution (per hour)</h2>
+        <!-- Start time distribution chart -->
+        <canvas id="timeChart" height="250" style="max-height:250px;"></canvas>
+        <!-- End time distribution chart rendered below the start chart -->
+        <canvas id="endTimeChart" height="250" style="max-height:250px; margin-top: 1rem;"></canvas>
+      </div>
+    </div>
+    <!-- Third row: auditorium utilisation chart on its own so that it may scale to fill the
+         available width.  By using a single column layout, this chart also benefits from
+         responsive sizing. -->
+    <div class="grid md:grid-cols-1 gap-8 mt-8">
+      <div class="bg-white shadow rounded-lg p-4">
+        <h2 class="text-lg font-semibold mb-2">Auditorium Utilisation</h2>
+        <canvas id="utilChart" height="250" style="max-height:250px;"></canvas>
+      </div>
+    </div>
+
+    <!-- Flagged Issues list: displays downtime gaps and late-first show slots identified in the schedule. -->
+    <div class="bg-white shadow rounded-lg p-4">
+      <h2 class="text-lg font-semibold mb-2">Flagged Issues</h2>
+      <!-- Populated dynamically by dashboard.js -->
+      <ul id="flaggedList" class="list-disc pl-5 space-y-1 text-sm text-gray-700"></ul>
+    </div>
+  </div>
+  <!-- Theme and global controls scripts -->
+  <script src="theme.js"></script>
+  <script src="header-controls.js?v=1"></script>
+</body>
+</html>

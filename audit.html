@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Audit</title>
+  <!-- Tailwind CSS for rapid styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Theme styles for dynamic gradients and navigation layout -->
+  <link rel="stylesheet" href="theme.css?v=13" />
+  <!-- Global application state -->
+  <!-- Update version to bust cache -->
+  <script src="app.js?v=6"></script>
+  <!-- Audit tab logic -->
+  <!-- Increment version to ensure browsers load the updated script when changes are made -->
+  <!-- Updated to v=3 after adding group separator borders -->
+  <script src="audit.js?v=3"></script>
+  <!-- Theme picker script -->
+  <script src="theme.js"></script>
+  <!-- Dense tables toggle: inserts a checkbox into the navigation controls for compact tables -->
+  <script src="dense-toggle.js?v=1"></script>
+  <!-- Dashboard bar script: provides a collapsible bottom panel with summary charts on all pages -->
+  <script src="dashboard-bar.js?v=5"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <!-- Navigation bar; mirrors other pages and includes Audit link -->
+  <nav class="nav-wrap grad-nav px-4 py-3">
+    <!-- First row: navigation links.  Keep all navigation anchors together so
+         they remain on a single line.  The date/time controls will appear
+         on a second row below. -->
+    <div class="nav-links flex flex-nowrap items-center gap-2">
+      <a href="index.html" class="nav-link hover:bg-blue-700">Home</a>
+      <a href="aud.html" class="nav-link hover:bg-blue-700">Auditoriums</a>
+      <a href="bookings.html" class="nav-link hover:bg-blue-700">Bookings</a>
+      <a href="prime.html" class="nav-link hover:bg-blue-700">Prime</a>
+      <a href="schedule-grid.html" class="nav-link hover:bg-blue-700">Schedule</a>
+      <a href="gantt.html" class="nav-link hover:bg-blue-700">Gantt</a>
+      <!-- Include the Dashboard link on the Audit page so it remains visible across tabs -->
+      <a href="dashboard.html" class="nav-link hover:bg-blue-700">Dashboard</a>
+      <a href="audit.html" class="nav-link hover:bg-blue-700 font-bold">Audit</a>
+    </div>
+    <!-- Second row: date/time controls.  Wrap onto its own line and take the
+         full width of the nav so that the navigation links above never
+         overflow the viewport. -->
+    <div class="nav-controls flex flex-wrap items-center gap-3 w-full mt-2">
+      <!-- Placeholder for the film highlight dropdown injected by app.js.  Keeping this span ensures
+           the highlight select appears consistently across pages. -->
+      <span id="filmHighlightPlaceholder"></span>
+      <!-- First and last show selectors for the audit tables -->
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>First</span>
+        <select id="firstShowAuditSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>Last</span>
+        <select id="lastShowAuditSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <!-- Date selector with previous/next buttons -->
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>Date</span>
+        <div class="flex items-center">
+          <button id="prevDateAuditBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-l bg-white text-gray-800" title="Previous day">&larr;</button>
+          <input type="text" id="scheduleDateAudit" placeholder="MM/DD/YYYY" class="border-t border-b border-gray-300 px-2 py-1 text-sm text-gray-800" />
+          <button id="nextDateAuditBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-r bg-white text-gray-800" title="Next day">&rarr;</button>
+        </div>
+      </label>
+      <!-- Always display Clear Times and Copy buttons so controls are consistent across tabs -->
+      <button id="clearTimesAuditBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear Times</button>
+      <button id="copyScheduleAuditBtn" onclick="openCopyPanel(this, 'scheduleDateAudit')" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Copy</button>
+    </div>
+    <!-- Swatches removed from the navigation bar.  They will be displayed below the header -->
+  </nav>
+  <!-- Place the colour swatches row below the header on the audit page for a consistent layout -->
+  <!-- Right‑align the colour swatches under the navigation bar -->
+  <div class="flex flex-wrap gap-2 px-4 py-2 justify-end">
+    <button class="swatch" data-brand-from="#3b82f6" data-brand-to="#4f46e5" style="background-image: linear-gradient(to right,#3b82f6,#4f46e5);"></button>
+    <button class="swatch" data-brand-from="#1e3a8a" data-brand-to="#312e81" style="background-image: linear-gradient(to right,#1e3a8a,#312e81);"></button>
+    <button class="swatch" data-brand-from="#ff8a00" data-brand-to="#ff6a00" style="background-image: linear-gradient(to right,#ff8a00,#ff6a00);"></button>
+    <button class="swatch" data-brand-from="#c2410c" data-brand-to="#a53e0a" style="background-image: linear-gradient(to right,#c2410c,#a53e0a);"></button>
+    <button class="swatch" data-brand-from="#10b981" data-brand-to="#22c55e" style="background-image: linear-gradient(to right,#10b981,#22c55e);"></button>
+    <button class="swatch" data-brand-from="#065f46" data-brand-to="#064e3b" style="background-image: linear-gradient(to right,#065f46,#064e3b);"></button>
+    <button class="swatch" data-brand-from="#8b5cf6" data-brand-to="#7c3aed" style="background-image: linear-gradient(to right,#8b5cf6,#7c3aed);"></button>
+    <button class="swatch" data-brand-from="#6d28d9" data-brand-to="#4c1d95" style="background-image: linear-gradient(to right,#6d28d9,#4c1d95);"></button>
+  </div>
+  <!-- Expand to full width and reserve space for the Start‑time Order panel (28rem). -->
+  <!-- Remove reserved right margin so the tables can use the full width when the order panel is hidden -->
+  <div class="px-6 pt-4 pb-6">
+    <h2 class="text-xl font-semibold mb-4">Audit</h2>
+    <!-- The date selector has been moved into the navigation bar. -->
+    <!-- Use a responsive grid to place multiple audit tables side by side on larger screens. -->
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+      <!-- Schedule by Film table -->
+      <div>
+        <h3 class="text-lg font-semibold mb-2">Schedule by Film</h3>
+        <div>
+          <table class="min-w-full table-fixed w-full rounded-xl overflow-hidden ring-1 ring-slate-200 shadow bg-white">
+            <thead class="grad-header text-xs">
+              <tr>
+                <th class="px-2 py-1 text-left">Film</th>
+                <th class="px-2 py-1 text-left">Start</th>
+                <th class="px-2 py-1 text-left">Auditorium</th>
+                <th class="px-2 py-1 text-left">Gap</th>
+              </tr>
+            </thead>
+            <tbody id="auditByFilmBody" class="divide-y divide-gray-200 odd:bg-white even:bg-gray-50 text-sm"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- House Placement Audit table -->
+      <div>
+        <h3 class="text-lg font-semibold mb-2">House Placement Audit</h3>
+        <div>
+          <table class="min-w-full table-fixed w-full rounded-xl overflow-hidden ring-1 ring-slate-200 shadow bg-white">
+            <thead class="grad-header text-xs">
+              <tr>
+                <th class="px-2 py-1 text-left">Film</th>
+                <th class="px-2 py-1 text-left">Auditoriums</th>
+              </tr>
+            </thead>
+            <tbody id="housePlacementBody" class="divide-y divide-gray-200 odd:bg-white even:bg-gray-50 text-sm"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Shows per Auditorium table -->
+      <div>
+        <h3 class="text-lg font-semibold mb-2">Shows per Aud</h3>
+        <div>
+          <table class="min-w-full table-fixed w-full rounded-xl overflow-hidden ring-1 ring-slate-200 shadow bg-white">
+            <thead class="grad-header text-xs">
+              <tr>
+                <th class="px-2 py-1 text-left">Auditorium</th>
+                <th class="px-2 py-1 text-left">Seats</th>
+                <th class="px-2 py-1 text-left">Shows</th>
+                <th class="px-2 py-1 text-left">First Show</th>
+                <th class="px-2 py-1 text-left">Last Show</th>
+              </tr>
+            </thead>
+            <tbody id="showsPerAudBody" class="divide-y divide-gray-200 odd:bg-white even:bg-gray-50 text-sm"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Shows per Feature table -->
+      <div>
+        <h3 class="text-lg font-semibold mb-2">Shows per Feature</h3>
+        <div>
+          <table class="min-w-full table-fixed w-full rounded-xl overflow-hidden ring-1 ring-slate-200 shadow bg-white">
+            <thead class="grad-header text-xs">
+              <tr>
+                <th class="px-2 py-1 text-left">Film</th>
+                <th class="px-2 py-1 text-left">Prints</th>
+                <th class="px-2 py-1 text-left">Shows</th>
+                <th class="px-2 py-1 text-left">First Show</th>
+                <th class="px-2 py-1 text-left">Last Show</th>
+              </tr>
+            </thead>
+            <tbody id="showsPerFeatureBody" class="divide-y divide-gray-200 odd:bg-white even:bg-gray-50 text-sm"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+<!-- Include order panel overlay script with version to avoid caching. This adds
+     the "Show Order" toggle to the navigation bar so users can inspect the
+     start‑time order from any page. -->
+<script src="order-panel.js?v=13"></script>
+</html>

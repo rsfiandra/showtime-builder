@@ -1,0 +1,532 @@
+.w-14 {
+  max-width: 3.5rem;
+}
+
+/*
+ * Override film highlight styling for better visibility.
+ * We append this rule at the end of the stylesheet so it takes
+ * precedence over earlier definitions of .film-highlight.  The
+ * semi‑dark pink colour uses a higher opacity for stronger contrast
+ * and forces the text colour to black.  Clearing the background
+ * image ensures gradients do not bleed through the highlight.
+ */
+.film-highlight {
+  background-color: rgba(245, 142, 182, 0.6) !important;
+  background-image: none !important;
+  color: #000 !important;
+}
+
+/* Hide the film highlight dropdown on pages that declare the `no-highlight`
+   class on the <body>.  Including a placeholder on every page prevents the
+   navigation bar from shifting when switching tabs, but the select itself
+   should not appear on pages where film highlighting is not relevant.  The
+   placeholder remains visible to reserve space; the select is hidden. */
+.no-highlight #filmHighlightSelect {
+  display: none !important;
+}
+.no-highlight #filmHighlightPlaceholder {
+  display: inline-block;
+  min-width: 9rem;
+}
+
+/* Reserve space for the film highlight dropdown on all pages.  The
+   placeholder span is used to inject the select on pages that need it,
+   but it should occupy a consistent width even when empty so that
+   controls do not shift left or right between tabs. */
+#filmHighlightPlaceholder {
+  display: inline-block;
+  min-width: 9rem;
+}
+
+/* Ensure the highlight dropdown itself occupies the same width as the
+   placeholder when present.  Allow it to grow up to a reasonable
+   maximum so longer film titles do not push other controls around. */
+#filmHighlightSelect {
+  min-width: 9rem;
+  max-width: 14rem;
+}
+
+/* Ensure the order panel toggle button has a consistent width whether
+   showing "Show Order" or "Hide Order".  Without this rule, the
+   button's width changes when its label changes, causing nearby
+   controls to shift.  Center the text so both labels look balanced. */
+#orderPanelToggleBtn {
+  min-width: 8rem;
+  text-align: center;
+}
+:root {
+  /* Default brand colours: darkened blue and indigo tones for a more
+     subdued, richer look.  These values can still be overridden by
+     the colour swatches in theme.js. */
+  --brand-from: #1e3a8a;
+  --brand-to: #312e81;
+}
+/* Apply the selected gradient colours to table headers. This class should be used on <thead> elements. */
+/* Solid header background for tables: use the primary swatch colour on all
+   header cells instead of a gradient.  Gradients can clash on certain
+   colour combinations, so a solid colour ensures consistent appearance. */
+.grad-header {
+  background-color: var(--brand-from);
+  color: #ffffff;
+  /* Remove any background image to avoid mixing gradients */
+  background-image: none;
+}
+/* Apply the selected gradient colours to show bars on the Gantt timeline.  When a bar
+   is not active or in conflict, it receives this class.  Highlighting an
+   active bar will remove this class in gantt.js so the purple highlight can
+   show through. */
+.grad-bar {
+  background-image: linear-gradient(to right, var(--brand-from), var(--brand-to));
+  color: #ffffff;
+}
+/* Flex-wrap navigation bar. Allows nav items and the theme picker to wrap neatly and prevents overlap on narrow screens. */
+/* Navigation bar wrapper
+   Keep the top-level navigation items on a single row so they remain
+   visible across pages.  Prevent the nav items from wrapping by
+   disabling flex-wrap; if the combined width exceeds the viewport the
+   bar will scroll horizontally instead of pushing items to a second
+   line.  A small gap between items preserves spacing.  Align items
+   vertically centered to match the existing design. */
+/*
+  Navigation wrapper
+
+  Arrange the main navigation bar into a flexible container that can
+  wrap its children onto multiple lines.  This prevents important
+  links from being pushed off‑screen when additional controls (like
+  date selectors or a film highlight dropdown) are present.  The nav
+  links are grouped into a separate flex container inside each page’s
+  markup; controls such as first/last selectors, date pickers, copy
+  buttons and the optional film highlight dropdown live in a second
+  container.  By allowing the wrapper to wrap, the links remain on
+  the first row and the controls move to a new row as needed.
+
+  The wrapper no longer scrolls horizontally; instead content will
+  wrap naturally when it exceeds the viewport width.  Align items to
+  the start so that multi‑row content flows from the left edge.
+*/
+.nav-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+/* When a navigation bar uses the grad-nav class, make nav links inherit the text
+   colour from the parent.  This ensures the links remain visible on top of the
+   gradient background.  Hover styles defined in the HTML (e.g. hover:bg-blue-600)
+   still apply but will use the inherited white text. */
+.grad-nav .nav-link {
+  color: inherit;
+}
+
+/* Apply the selected gradient colours to the navigation bar.  This allows the
+   theme swatch to colour the nav header just like the table headers.  The
+   nav inherits the global text colour (white) so links remain legible. */
+.grad-nav {
+  background-image: linear-gradient(to right, var(--brand-from), var(--brand-to));
+  color: #ffffff;
+}
+/* Small colour swatches used for the theme picker. */
+.swatch {
+  height: 20px;
+  width: 20px;
+  border-radius: 9999px;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+
+/* Provide basic styling for nav-link anchors. These mimic the Tailwind
+   utility classes px-4 py-2 rounded-md text-sm font-medium. Because
+   these pages are static, we can't rely on Tailwind's JIT to create a
+   custom class. Defining nav-link here ensures that all pages share
+   consistent spacing and typography. */
+/* Style navigation links with slightly more rounded corners than the default
+   Tailwind `rounded-md` (0.375rem). Using a 0.5rem radius gives
+   buttons a softer, more pill‑like appearance without drastically
+   changing the layout. All other spacing and font sizes remain the
+   same. */
+.nav-link {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: inline-block;
+}
+
+/* Keep the group of navigation links on a single row.  This prevents
+   important tabs (e.g. Dashboard) from being pushed to a new line
+   when additional controls are present.  Horizontal scrolling is
+   enabled if the available width is insufficient. */
+.nav-links {
+  flex-wrap: nowrap !important;
+  overflow-x: auto;
+}
+
+/*
+ * Temporary highlight applied when navigating to a specific auditorium row
+ * via the dashboard's flagged issues list.  Rows with this class will
+ * briefly flash a yellow background, then fade back to transparent.
+ */
+.jump-highlight {
+  animation: jumpFlash 1.0s ease-in-out;
+}
+@keyframes jumpFlash {
+  0% { background-color: rgba(253, 224, 71, 0.6); }
+  50% { background-color: rgba(253, 224, 71, 0.3); }
+  100% { background-color: transparent; }
+}
+
+/* Dense table styles
+   Some tables (Auditoriums, Bookings and Prime schedule) should present more
+   information in a compact form.  The `dense-table` class reduces the
+   vertical padding on table header and body cells so that rows occupy
+   less height without affecting readability.  Use this class on the
+   <table> element to opt‑in to the denser layout. */
+.dense-table th,
+.dense-table td {
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+}
+
+/* When the body has the `dense` class, reduce table cell padding and font size
+   globally.  This class is toggled via dense-toggle.js and provides a
+   compact layout similar to the alternate Viewer application.  The
+   !important declarations ensure that these rules override Tailwind
+   utility classes applied directly to the tables. */
+body.dense table th,
+body.dense table td {
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+  padding-left: 0.35rem !important;
+  padding-right: 0.35rem !important;
+  font-size: 0.75rem !important;
+}
+
+/*
+  Hide the native dropdown arrow on all <select> elements and adjust padding.
+  The original deployed application used custom dropdown styling without the
+  default caret, which allowed narrower columns. Removing the default arrow
+  brings our static pages closer to that look. The appearance rules target
+  all browsers, and the background-image is cleared to hide any default
+  indicators. We also reduce the right padding slightly since there is no
+  arrow occupying space.
+*/
+select {
+  /* Remove the native dropdown arrow.  Use !important to override any
+     Tailwind forms plugin defaults that may reintroduce a custom arrow.
+     Without !important some embedded styles can override the appearance
+     properties on certain browsers. */
+  -moz-appearance: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  /* Remove any background image that might contain an arrow. */
+  background-image: none !important;
+  /* Slightly reduce right padding since there is no arrow occupying space. */
+  padding-right: 0.5rem;
+}
+
+/* Limit the maximum width of common Tailwind width classes to avoid overly
+   wide columns on pages that use selects or time inputs.  The original
+   deployed version kept dropdowns compact by hiding the native arrow and
+   restricting the width.  By clamping these widths we prevent the columns
+   from growing when content is short.  We explicitly enumerate the widths
+   used throughout the app so they remain responsive when needed but never
+   exceed the specified size. */
+.w-12 {
+  max-width: 3rem;
+}
+.w-16 {
+  max-width: 4rem;
+}
+.w-20 {
+  max-width: 5rem;
+}
+.w-24 {
+  max-width: 6rem;
+}
+.w-28 {
+  max-width: 7rem;
+}
+.w-32 {
+  max-width: 8rem;
+}
+
+/* Highlight style for film names when a movie is selected from the
+   header dropdown.  Use a semi‑dark pinkish background with some
+   transparency so the text remains legible.  The rgba colour
+   (245, 142, 182, 0.4) results in a medium pink overlay that stands
+   out without overpowering the existing table colours. */
+/* Highlight style for film names and Gantt bars when a movie is selected.
+   Use a semi‑dark pinkish overlay on top of existing elements.  Setting
+   background-image to none ensures that gradient bars are overridden by
+   the solid highlight colour.  The !important flags are necessary to
+   override inline styles and other utility classes. */
+.film-highlight {
+  /* Use a darker pink overlay for better contrast on the Gantt bars and tables.  A higher
+     alpha value (0.6) provides sufficient differentiation without turning the
+     text red.  Also override the text colour to black so content remains
+     legible when highlighted. */
+  background-color: rgba(245, 142, 182, 0.6) !important;
+  background-image: none !important;
+  color: #000 !important;
+}
+
+/* --- Themed Buttons ------------------------------------------------------ */
+.btn {
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  font-weight: 600;
+  font-size: 0.875rem; /* text-sm */
+  line-height: 1.25rem;
+}
+.btn-primary {
+  background-image: linear-gradient(to right, var(--brand-from), var(--brand-to));
+  color: #ffffff;
+}
+.btn-danger {
+  background-color: #b91c1c; /* red-700 */
+  color: #ffffff;
+}
+.btn-outline {
+  border: 1px solid rgba(255,255,255,0.7);
+  color: #ffffff;
+  background: transparent;
+}
+/* Make header (nav) buttons follow the active swatch by default */
+.grad-nav button:not(.btn-danger) {
+  background-image: linear-gradient(to right, var(--brand-from), var(--brand-to)) !important;
+  color: #ffffff !important;
+  border-radius: 0.5rem !important;
+  padding: 0.25rem 0.75rem !important;
+}
+
+/* === Global Button Theming (swatch-driven) ================================ */
+/* Make all <button> and .btn elements follow the active swatch gradient */
+button, .btn {
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  font-weight: 600;
+  font-size: 0.875rem; /* text-sm */
+  line-height: 1.25rem;
+  background-image: linear-gradient(to right, var(--brand-from, #1e3a8a), var(--brand-to, #312e81));
+  color: #ffffff;
+  border: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Schedule grid header override
+
+   The schedule grid uses the dense-schedule class on its card-table to
+   support compact rows.  However, by default all card-table headers have a
+   gradient background defined by the `.card-table thead th` rule.  This
+   causes each time column header to receive its own mini-gradient, which
+   creates a striped appearance across the header row.  To match the
+   Prime tab (which uses a solid header), override the gradient on dense
+   schedule tables so the entire header row is a single solid colour.
+
+   Use higher specificity (`.card-table.dense-schedule thead th`) and place
+   this rule after the global card-table styles so it takes precedence.
+*/
+.card-table.dense-schedule thead th {
+  background-image: none !important;
+  background-color: var(--brand-from) !important;
+  color: #ffffff !important;
+}
+
+/* Apply a solid header background to any card-table header row that uses
+   the grad-header class.  The default card-table rule applies a
+   gradient to each <th>, but when the developer explicitly adds
+   class="grad-header" to the <thead>, we want a single solid colour
+   across the entire header (matching the active swatch).  This rule
+   overrides the gradient on all table header cells within the
+   grad-header element. */
+.card-table .grad-header th {
+  background-image: none !important;
+  background-color: var(--brand-from) !important;
+  color: #ffffff !important;
+}
+
+/* Dark pink style for explicit clear actions */
+.btn-clear {
+  background-image: linear-gradient(to right, #be185d, #db2777) !important; /* pink-700 -> pink-600 */
+  color: #ffffff !important;
+}
+
+/* Auto-style any button with id/class containing 'clear' */
+button[id*="clear"], button[class*="clear"] {
+  background-image: linear-gradient(to right, #be185d, #db2777) !important;
+  color: #ffffff !important;
+}
+
+/* Keep an explicit danger style available */
+.btn-danger {
+  background-color: #b91c1c !important; /* red-700 */
+  background-image: none !important;
+  color: #ffffff !important;
+}
+
+/* ===== Card-style grid tables with sticky headers and focus states ===== */
+/* These styles provide a compact, card-like look for editable tables,
+   similar to the employee scheduler. The table is wrapped in a
+   `.card-table` container which applies a border, rounded corners,
+   subtle shadow and zebra striping. The header sticks to the top and
+   uses the active gradient colours. Rows alternate background colours
+   and highlight on hover. Cells with focused inputs get an outline
+   for easy keyboard navigation. */
+.card-table {
+  /* Use a light grey border and a larger radius so the card table is
+     clearly separated from the page.  A fixed colour instead of
+     rgba() ensures the border remains visible on light backgrounds. */
+  /* Use a darker light-grey border so the card outline stands out
+     against the page background. */
+  border: 1px solid #d1d5db; /* slate-300 */
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: #fff;
+  /* Increase shadow slightly to accentuate the card appearance */
+  /* Use a slightly larger drop shadow to emphasise the card container */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+.card-table table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.card-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  /* Use the active swatch for the header gradient */
+  background-image: linear-gradient(to right, var(--brand-from), var(--brand-to));
+  color: #fff;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 0.5rem 0.625rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+}
+.card-table tbody td {
+  padding: 0.375rem 0.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: 0.875rem;
+}
+.card-table tbody tr:nth-child(odd) td {
+  /* Use a soft grey for odd rows.  The contrast is more pronounced so
+     zebra striping is visible even on light backgrounds. */
+  background: #f3f4f6;
+}
+.card-table tbody tr:nth-child(even) td {
+  /* Keep even rows white for clear zebra striping */
+  background: #ffffff;
+}
+.card-table tbody tr:hover td {
+  /* Provide a stronger hover colour so focused rows stand out */
+  background: #e0e7ff;
+}
+.card-table input[type="text"],
+.card-table input[type="number"],
+.card-table select {
+  width: 100%;
+  min-height: 28px;
+  box-sizing: border-box;
+  /* Remove borders on inputs to allow the table's row stripes to define
+     the grid.  This makes the table resemble a spreadsheet where
+     cell boundaries are implied rather than drawn explicitly. */
+  border: none;
+  border-radius: 0;
+  padding: 0.125rem 0.25rem;
+  background: transparent;
+}
+
+/* Remove the default browser outline from inputs/selects in card tables.
+   The parent td receives a custom focus outline via the navcell class. */
+.card-table input[type="text"]:focus,
+.card-table input[type="number"]:focus,
+.card-table select:focus {
+  outline: none;
+}
+/* Highlight any navcell when a descendant control has focus */
+.card-table .navcell:focus-within,
+.card-table .navcell.navfocus {
+  outline: 2px solid rgba(63, 131, 248, 0.6);
+  outline-offset: -2px;
+}
+
+/* Reduce row height for the schedule grid. When the card-table wrapper
+   has the dense-schedule class, shrink the vertical padding on
+   header and body cells so the grid appears more compact. */
+/* Reduce vertical padding even more for schedule grid cells.  These values
+   apply only when the card-table wrapper has the dense-schedule class. */
+.card-table.dense-schedule thead th {
+  /* Eliminate top and bottom padding on header cells in the dense schedule grid
+     to tighten the header row. */
+  padding-top: 0rem;
+  padding-bottom: 0rem;
+}
+/* Style schedule grid cells (dense-schedule) to support two-line content (start and end times).
+   We enlarge the row height and reduce the font size slightly so that
+   both the start time input and end time label fit comfortably on
+   separate lines without overlapping.  Previously the row height was
+   too small, causing the end time to overlap the start time for some
+   rows.  Use at least 2rem (32px) to ensure there is ample vertical
+   space for both lines plus a small gap. */
+/*
+   Default styling for dense-schedule table cells.  We allocate enough vertical
+   space for two lines (start time and end time) plus some breathing room
+   when end times are visible.  When end times are hidden (condensed mode),
+   the sg-condensed class is applied to the body which overrides these
+   heights to a more compact value.
+*/
+.card-table.dense-schedule tbody td {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  font-size: 0.875rem;
+  line-height: 1rem;
+  /* Allocate 3rem (≈48px) for two lines when end times are visible. */
+  height: 3rem;
+  min-height: 3rem;
+  vertical-align: top;
+}
+
+/* Inputs inside a dense schedule grid inherit the cell font size. Remove
+   vertical padding and set a one-line height so the input and label
+   stack neatly.  We leave the height at 1rem so that the cell height
+   (2rem) still allocates enough space for the end time label below. */
+.card-table.dense-schedule input[type="text"] {
+  font-size: 0.875rem;
+  padding-top: 0;
+  padding-bottom: 0;
+  line-height: 1rem;
+  height: 1rem;
+}
+
+/* The container <div> inside each navcell now stacks its children vertically.
+   Allow it to expand to accommodate both lines but enforce a minimum
+   height equal to the row height (2rem) to keep rows consistent across the grid. */
+/* The container <div> inside each navcell stacks its children vertically.  It
+   inherits the row height to ensure that the input and end time label
+   always have enough space. */
+.card-table.dense-schedule td.navcell > div {
+  height: 3rem;
+  min-height: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+/* In condensed mode (when end times are hidden), shrink the row heights
+   significantly.  The sg-condensed class is toggled on the body by
+   schedule-grid.js when the user clicks "Hide End Times".  This
+   overrides the default 3rem height above. */
+body.sg-condensed .card-table.dense-schedule tbody td {
+  height: 1.5rem;
+  min-height: 1.5rem;
+}
+body.sg-condensed .card-table.dense-schedule td.navcell > div {
+  height: 1.5rem;
+  min-height: 1.5rem;
+}
