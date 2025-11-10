@@ -3217,6 +3217,7 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
 // Auditoriums page logic
 // Access global ShowtimeState via window. Do not import as module because
 // app.js attaches ShowtimeState to the window object.
+(() => {
 const ShowtimeState = window.ShowtimeState;
 
 // Global flag used to suppress full re-renders while the user is tabbing
@@ -3519,10 +3520,13 @@ if (document.readyState === 'loading') {
   initAudPage();
 }
 
+})();
+
 
 // bookings.js
 // Bookings page logic
 // Access global ShowtimeState via window
+(() => {
 const ShowtimeState = window.ShowtimeState;
 
 // Global flag used to suppress full re-renders during tab navigation. When
@@ -4400,10 +4404,13 @@ if (document.readyState === 'loading') {
   initBookingsPage();
 }
 
+})();
+
 
 // prime.js
 // Prime schedule page logic
 // Access global ShowtimeState via window
+(() => {
 const ShowtimeState = window.ShowtimeState;
 
 // Keep track of the currently open custom prime dropdown menu so that only one menu
@@ -4954,10 +4961,13 @@ if (document.readyState === 'loading') {
   initPrimePage();
 }
 
+})();
+
 
 // schedule-grid.js
 // Schedule grid page logic
 // Access global ShowtimeState via window
+(() => {
 const ShowtimeState = window.ShowtimeState;
 
 // Maintain the next grid cell to focus after a navigation-induced re-render.  When
@@ -6478,10 +6488,13 @@ if (document.readyState === 'loading') {
   initScheduleGridPage();
 }
 
+})();
+
 
 // order.js
 // Start‑time order view with nudge controls
 // Access the global ShowtimeState via window
+(() => {
 const ShowtimeState = window.ShowtimeState;
 
 function initOrderView() {
@@ -6676,6 +6689,8 @@ if (document.readyState === 'loading') {
 } else {
   initOrderView();
 }
+
+})();
 
 
 // gantt.js
@@ -8155,6 +8170,8 @@ if (document.readyState === 'loading') {
 // If the gap between two shows is less than 30 minutes, the cell is
 // highlighted for easy visualisation.
 
+(() => {
+
 function initAuditPage() {
   const ShowtimeState = window.ShowtimeState;
   if (!ShowtimeState) return;
@@ -8614,6 +8631,8 @@ if (document.readyState === 'loading') {
 } else {
   initAuditPage();
 }
+
+})();
 
 
 // theme.js
@@ -9490,6 +9509,8 @@ if (document.readyState === 'loading') {
 // Provides buttons to export the entire state to JSON or a CSV of all shows,
 // and to import a previously exported JSON file to restore the schedule.
 
+(() => {
+
 function initDataControls() {
   const ShowtimeState = window.ShowtimeState;
   // Ensure state is loaded before interacting
@@ -9715,6 +9736,8 @@ if (document.readyState === 'loading') {
 } else {
   initDataControls();
 }
+
+})();
 
 
   </script>
