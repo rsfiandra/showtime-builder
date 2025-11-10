@@ -210,6 +210,126 @@
         </div>
       </div>
     </section>
+
+    <section data-view="bookings" hidden>
+      <!-- Expand to full width and reserve space for the Start-time Order panel (28rem).
+           Removing the max-width eliminates dead space on the left. -->
+      <!-- Remove reserved right margin so the table can use the full width when the order panel is hidden -->
+      <div class="px-6 pt-4 pb-6">
+        <h2 class="text-xl font-semibold mb-4">Bookings</h2>
+        <!-- Add and Clear buttons: the Add button remains in the markup for compatibility but is hidden via JS.  -->
+        <!-- Standardise button sizing across pages -->
+        <button id="addBookingBtn" class="mb-3 px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Add Booking</button>
+        <button id="clearBookingsBtn" class="mb-3 ml-2 px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear Bookings</button>
+        <div class="overflow-x-auto">
+          <!-- Wrap the bookings table in a card-table container for card-like styling -->
+          <div class="card-table">
+            <table>
+              <!-- Apply grad-header so bookings table header uses a solid colour matching the theme -->
+              <thead class="grad-header">
+              <tr>
+                <!-- Reorder columns so that Slot appears first.  Widths remain unchanged. -->
+                <th class="px-2 py-1 text-left">Slot</th>
+                <th class="px-2 py-1 text-left">Film Title</th>
+                <th class="px-2 py-1 text-left">Format</th>
+                <th class="px-2 py-1 text-left">Runtime</th>
+                <th class="px-2 py-1 text-left">Trailer</th>
+                <th class="px-2 py-1 text-left">Priority</th>
+                <th class="px-2 py-1 text-left">Rating</th>
+                <th class="px-2 py-1 text-left">Notes &#8211; Policy/Comments</th>
+                <th class="px-2 py-1 text-left">Week&#35;</th>
+                <th class="px-2 py-1 text-left">Clean&nbsp;up</th>
+                <th class="px-2 py-1 text-left">Delete</th>
+              </tr>
+              </thead>
+              <tbody id="bookingBody">
+              <!-- rows inserted via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section data-view="prime" hidden>
+      <div class="px-6 pt-4 pb-6 space-y-4">
+        <header class="flex flex-wrap items-center gap-3 bg-white/60 rounded-xl px-4 py-3 shadow">
+          <div class="flex items-center gap-2">
+            <label class="flex items-center gap-2 text-sm">
+              <span class="font-medium">First</span>
+              <select id="firstShowPrimeSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+            </label>
+            <label class="flex items-center gap-2 text-sm">
+              <span class="font-medium">Last</span>
+              <select id="lastShowPrimeSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+            </label>
+          </div>
+          <div class="flex items-center gap-2 text-sm">
+            <span class="font-medium">Date</span>
+            <div class="flex items-center">
+              <button id="prevDatePrimeBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-l bg-white text-gray-800" title="Previous day">&larr;</button>
+              <input type="text" id="scheduleDatePrime" placeholder="MM/DD/YYYY" class="border-t border-b border-gray-300 px-2 py-1 text-sm text-gray-800" />
+              <button id="nextDatePrimeBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-r bg-white text-gray-800" title="Next day">&rarr;</button>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 ml-auto">
+            <button id="clearTimesBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear Times</button>
+            <button id="copyScheduleBtn" onclick="openCopyPanel(this, 'scheduleDatePrime')" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Copy</button>
+          </div>
+        </header>
+        <div>
+          <h2 class="text-xl font-semibold mb-4">Build Prime Schedule</h2>
+          <div class="overflow-x-auto">
+            <!-- Use table-auto so column widths adjust to their content. Removing the fixed layout
+                 allows pre and post time columns to expand naturally instead of crowding. -->
+            <!-- Apply dense-table class to make prime schedule rows more compact -->
+            <table class="dense-table min-w-full w-full rounded-xl overflow-hidden ring-1 ring-slate-200 shadow bg-white">
+              <!-- Use gradient styling similar to the original Showtime Builder header.  We split the pre and post columns
+                   into eight individual cells to prevent long strings of times from crowding together.  The first pre
+                   and post cell are labelled; the rest are empty to maintain alignment. -->
+              <!-- Header: apply the gradient across the entire row so all column labels are legible.  The
+                   text colour is forced to white via the grad-header class.  Each pre and post
+                   column is given an explicit width in ch units to align with the times displayed in
+                   the body.  We label only the first pre and post cells; the rest are blank for
+                   alignment. -->
+              <thead class="grad-header text-xs">
+                <tr>
+                  <th class="px-2 py-1 text-left align-middle whitespace-nowrap">Aud</th>
+                  <th class="px-2 py-1 text-left align-middle whitespace-nowrap">Slot</th>
+                  <th class="px-2 py-1 text-left align-middle whitespace-nowrap">Film Title</th>
+                  <th class="px-2 py-1 text-left align-middle whitespace-nowrap">Turnkey</th>
+                  <!-- Pre time headers: first labelled, subsequent blanks -->
+                  <th class="px-2 py-1 text-center align-middle whitespace-nowrap">Pre</th>
+                  <th class="px-2 py-1"></th>
+                  <th class="px-2 py-1"></th>
+                  <th class="px-2 py-1"></th>
+                  <th class="px-2 py-1"></th>
+                  <th class="px-2 py-1"></th>
+                  <th class="px-2 py-1"></th>
+                  <th class="px-2 py-1"></th>
+                  <!-- Prime column header: styled like the rest of the row; we rely on the gradient
+                       for visual emphasis rather than a different background.  -->
+                  <th class="px-2 py-1 text-center align-middle whitespace-nowrap">Prime</th>
+                  <!-- Post time headers: first labelled, subsequent blanks -->
+                  <th class="px-2 py-1 text-center align-middle whitespace-nowrap">Post</th>
+                  <th class="px-2 py-1"></th>
+                  <th class="px-2 py-1"></th>
+                  <th class="px-2 py-1"></th>
+                  <th class="px-2 py-1"></th>
+                  <th class="px-2 py-1"></th>
+                  <th class="px-2 py-1"></th>
+                  <th class="px-2 py-1"></th>
+                </tr>
+              </thead>
+              <tbody id="primeBody" class="divide-y divide-gray-200 odd:bg-white even:bg-gray-50 text-sm">
+                <!-- rows inserted via JS -->
+              </tbody>
+            </table>
+          </div>
+          <p class="text-sm text-gray-600 mt-3">Select a prime time for each booking. Pre and post times are automatically calculated. Duplicate prime times across auditoriums are highlighted.</p>
+        </div>
+      </div>
+    </section>
   </main>
   <script>
     (function() {
@@ -260,6 +380,8 @@
     })();
   </script>
   <script src="aud.js?v=15"></script>
+  <script src="bookings.js?v=16"></script>
+  <script src="prime.js?v=6"></script>
   <!-- Theme picker script: applies selected colours and persists choice -->
   <script src="theme.js"></script>
   <!-- Dense tables toggle: inserts a checkbox into the navigation controls for compact tables -->
