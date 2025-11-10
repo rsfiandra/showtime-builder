@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auditoriums</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Theme styles for dynamic gradients and navigation layout -->
+  <!-- Load the main theme stylesheet (solid header colours).  Cache buster included to ensure updates load properly. -->
+  <link rel="stylesheet" href="theme.css?v=13" />
+  <!-- Update version to bust cache -->
+  <script src="app.js?v=6"></script>
+  <!-- Append cache-busting version to ensure updated script loads -->
+  <!-- Increment cache buster to ensure the updated script loads -->
+  <!-- Bump version to ensure the updated navigation logic loads -->
+  <script src="aud.js?v=15"></script>
+  <!-- Theme picker script -->
+  <script src="theme.js"></script>
+  <!-- Dense tables toggle: inserts a checkbox into the navigation controls for compact tables -->
+  <script src="dense-toggle.js?v=1"></script>
+  <!-- Dashboard bar script: provides a collapsible bottom panel with summary charts on all pages -->
+  <script src="dashboard-bar.js?v=5"></script>
+  <!-- Header controls script: adds first/last show selectors and date picker on pages
+       that do not manage schedules directly.  Populates the controls and updates
+       ShowtimeState when changed. -->
+  <script src="header-controls.js?v=1"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <nav class="nav-wrap grad-nav px-4 py-3">
+    <!-- First row: navigation links. -->
+    <div class="nav-links flex flex-nowrap items-center gap-2">
+      <a href="index.html" class="nav-link hover:bg-blue-700">Home</a>
+      <a href="aud.html" class="nav-link hover:bg-blue-700 font-bold">Auditoriums</a>
+      <a href="bookings.html" class="nav-link hover:bg-blue-700">Bookings</a>
+      <a href="prime.html" class="nav-link hover:bg-blue-700">Prime</a>
+      <!-- Rename the grid link to Schedule and add a Gantt link -->
+      <a href="schedule-grid.html" class="nav-link hover:bg-blue-700">Schedule</a>
+      <a href="gantt.html" class="nav-link hover:bg-blue-700">Gantt</a>
+      <a href="dashboard.html" class="nav-link hover:bg-blue-700">Dashboard</a>
+      <a href="audit.html" class="nav-link hover:bg-blue-700">Audit</a>
+    </div>
+    <!-- Second row: date/time controls.  Reserve space for highlight dropdown. -->
+    <div class="nav-controls flex flex-wrap items-center gap-3 w-full mt-2">
+      <span id="filmHighlightPlaceholder"></span>
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>First</span>
+        <select id="firstShowGlobalSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>Last</span>
+        <select id="lastShowGlobalSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>Date</span>
+        <div class="flex items-center">
+          <button id="prevDateGlobalBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-l bg-white text-gray-800" title="Previous day">&larr;</button>
+          <input type="text" id="scheduleDateGlobal" placeholder="MM/DD/YYYY" class="border-t border-b border-gray-300 px-2 py-1 text-sm text-gray-800" />
+          <button id="nextDateGlobalBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-r bg-white text-gray-800" title="Next day">&rarr;</button>
+        </div>
+      </label>
+      <button id="copyScheduleGlobalBtn" onclick="openCopyPanel(this, 'scheduleDateGlobal')" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Copy</button>
+    </div>
+    <!-- Swatches removed from navigation bar; they will be placed below the header -->
+  </nav>
+  <!-- Colour swatch row: displayed below the nav bar to maintain space for controls -->
+  <!-- Right‑align the colour swatches under the navigation bar -->
+  <div class="flex flex-wrap gap-2 px-4 py-2 justify-end">
+    <button class="swatch" data-brand-from="#3b82f6" data-brand-to="#4f46e5" style="background-image: linear-gradient(to right,#3b82f6,#4f46e5);"></button>
+    <button class="swatch" data-brand-from="#1e3a8a" data-brand-to="#312e81" style="background-image: linear-gradient(to right,#1e3a8a,#312e81);"></button>
+    <button class="swatch" data-brand-from="#ff8a00" data-brand-to="#ff6a00" style="background-image: linear-gradient(to right,#ff8a00,#ff6a00);"></button>
+    <button class="swatch" data-brand-from="#c2410c" data-brand-to="#a53e0a" style="background-image: linear-gradient(to right,#c2410c,#a53e0a);"></button>
+    <button class="swatch" data-brand-from="#10b981" data-brand-to="#22c55e" style="background-image: linear-gradient(to right,#10b981,#22c55e);"></button>
+    <button class="swatch" data-brand-from="#065f46" data-brand-to="#064e3b" style="background-image: linear-gradient(to right,#065f46,#064e3b);"></button>
+    <button class="swatch" data-brand-from="#8b5cf6" data-brand-to="#7c3aed" style="background-image: linear-gradient(to right,#8b5cf6,#7c3aed);"></button>
+    <button class="swatch" data-brand-from="#6d28d9" data-brand-to="#4c1d95" style="background-image: linear-gradient(to right,#6d28d9,#4c1d95);"></button>
+  </div>
+  <!-- Expand the page content to the full width and reserve space on the right for the
+       Start‑time Order panel (28rem). Removing the max‑width ensures there is no
+       dead space on the left side of the table when the panel is closed. -->
+  <!-- Remove reserved right margin so content expands when the order panel is hidden.  The
+       order-panel script will shift the page when the panel is open. -->
+  <div class="px-6 pt-4 pb-6">
+    <h2 class="text-xl font-semibold mb-4">Auditoriums</h2>
+    <!-- Standardise button sizing across pages -->
+    <button id="addAudBtn" class="mb-3 px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Add Auditorium</button>
+    <!-- Button to clear all auditoriums.  Placed next to Add Auditorium for quick bulk removal. -->
+    <button id="clearAudBtn" class="mb-3 ml-2 px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear Auditoriums</button>
+    <!-- Wrap the auditorium table in a card-table container for card-like styling -->
+    <div class="card-table">
+      <table>
+        <!-- Apply grad-header to ensure the header background matches the theme colour (solid, not gradient) -->
+        <thead class="grad-header">
+        <tr>
+          <!-- Double the column widths from 10ch to 20ch for all auditorium fields. -->
+          <th class="px-2 py-1 text-left" style="width:20ch;max-width:20ch;">ID</th>
+          <th class="px-2 py-1 text-left" style="width:20ch;max-width:20ch;">Name</th>
+          <th class="px-2 py-1 text-left" style="width:20ch;max-width:20ch;">Format</th>
+          <th class="px-2 py-1 text-left" style="width:20ch;max-width:20ch;">Seats</th>
+          <!-- Column for per-row delete actions.  Narrower width to save space. -->
+          <th class="px-2 py-1 text-left" style="width:10ch;max-width:10ch;">Delete</th>
+        </tr>
+        </thead>
+        <tbody id="audBody">
+        <!-- rows inserted via JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <!-- Include order panel script to provide collapsible order view on this page -->
+  <!-- Include order panel overlay script with version to avoid caching -->
+<script src="order-panel.js?v=13"></script>
+</body>
+</html>

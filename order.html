@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Start‑time Order</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Theme styles for dynamic gradients and navigation layout -->
+  <!-- Use the updated theme file with solid header colours and no gradients -->
+  <link rel="stylesheet" href="theme.css?v=13" />
+  <!-- Update version to bust cache -->
+  <script src="app.js?v=6"></script>
+  <script src="order.js?v=3"></script>
+  <!-- Include order panel overlay script to provide a collapsible start‑time order view on this page as well -->
+<script src="order-panel.js?v=13"></script>
+  <!-- Theme picker script -->
+  <script src="theme.js"></script>
+  <!-- Dense tables toggle: inserts a checkbox into the navigation controls for compact tables -->
+  <script src="dense-toggle.js?v=1"></script>
+  <!-- Dashboard bar script: provides a collapsible bottom panel with summary charts on all pages -->
+  <script src="dashboard-bar.js?v=5"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <nav class="nav-wrap grad-nav px-4 py-3">
+    <!-- First row: navigation links -->
+    <div class="nav-links flex flex-nowrap items-center gap-2">
+      <a href="index.html" class="nav-link hover:bg-blue-700">Home</a>
+      <a href="aud.html" class="nav-link hover:bg-blue-700">Auditoriums</a>
+      <a href="bookings.html" class="nav-link hover:bg-blue-700">Bookings</a>
+      <a href="prime.html" class="nav-link hover:bg-blue-700">Prime</a>
+      <a href="schedule-grid.html" class="nav-link hover:bg-blue-700">Schedule</a>
+      <a href="gantt.html" class="nav-link hover:bg-blue-700">Gantt</a>
+      <a href="dashboard.html" class="nav-link hover:bg-blue-700">Dashboard</a>
+      <a href="audit.html" class="nav-link hover:bg-blue-700">Audit</a>
+    </div>
+    <!-- Second row: placeholder only.  Reserve space for the highlight dropdown to
+         prevent header shifting across pages. -->
+    <div class="nav-controls flex flex-wrap items-center gap-3 w-full mt-2">
+      <span id="filmHighlightPlaceholder"></span>
+    </div>
+    <!-- Swatches removed from the navigation bar; they will be placed below the header -->
+  </nav>
+  <!-- Colour swatch row below the nav: unify across pages -->
+  <!-- Right‑align the colour swatches under the navigation bar -->
+  <div class="flex flex-wrap gap-2 px-4 py-2 justify-end">
+    <button class="swatch" data-brand-from="#3b82f6" data-brand-to="#4f46e5" style="background-image: linear-gradient(to right,#3b82f6,#4f46e5);"></button>
+    <button class="swatch" data-brand-from="#1e3a8a" data-brand-to="#312e81" style="background-image: linear-gradient(to right,#1e3a8a,#312e81);"></button>
+    <button class="swatch" data-brand-from="#ff8a00" data-brand-to="#ff6a00" style="background-image: linear-gradient(to right,#ff8a00,#ff6a00);"></button>
+    <button class="swatch" data-brand-from="#c2410c" data-brand-to="#a53e0a" style="background-image: linear-gradient(to right,#c2410c,#a53e0a);"></button>
+    <button class="swatch" data-brand-from="#10b981" data-brand-to="#22c55e" style="background-image: linear-gradient(to right,#10b981,#22c55e);"></button>
+    <button class="swatch" data-brand-from="#065f46" data-brand-to="#064e3b" style="background-image: linear-gradient(to right,#065f46,#064e3b);"></button>
+    <button class="swatch" data-brand-from="#8b5cf6" data-brand-to="#7c3aed" style="background-image: linear-gradient(to right,#8b5cf6,#7c3aed);"></button>
+    <button class="swatch" data-brand-from="#6d28d9" data-brand-to="#4c1d95" style="background-image: linear-gradient(to right,#6d28d9,#4c1d95);"></button>
+  </div>
+  <!-- Expand to full width and reserve space for the Start‑time Order panel (28rem). -->
+  <!-- Remove reserved right margin so the table can use the full width when the order panel is hidden -->
+  <!-- Reduce padding and remove the large page heading so the table header sits closer to the nav bar -->
+  <div class="px-6 pt-4 pb-6">
+    <div class="overflow-x-auto">
+      <!-- Use a simplified table layout similar to the older Start‑time Order panel -->
+      <table class="w-full rounded-xl overflow-hidden ring-1 ring-slate-200 shadow bg-white text-sm text-gray-800">
+        <thead class="grad-header text-xs uppercase tracking-wide sticky top-0 z-10 text-white/90">
+          <tr>
+            <th class="px-2 py-1 text-left">Start</th>
+            <th class="px-2 py-1 text-left">Clean</th>
+            <th class="px-2 py-1 text-left">Aud</th>
+            <th class="px-2 py-1 text-left">Film</th>
+            <th class="px-2 py-1 text-left">Nudge</th>
+          </tr>
+        </thead>
+        <tbody id="orderBody" class="text-sm">
+          <!-- rows inserted via JS -->
+        </tbody>
+      </table>
+    </div>
+    <p class="text-sm text-gray-600 mt-3">Use the ▲/▼ buttons to nudge show start times earlier or later in 5‑minute increments. These changes persist across all views.</p>
+  </div>
+</body>
+</html>

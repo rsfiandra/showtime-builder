@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Showtime Builder</title>
+  <!-- Tailwind CSS for rapid styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Theme styles for dynamic gradients and navigation layout -->
+  <link rel="stylesheet" href="theme.css?v=13" />
+  <!-- Update version to bust cache -->
+  <script src="app.js?v=6"></script>
+  <!-- The home page does not need the start‑time order panel. Avoid loading
+       order-panel.js here to prevent the UI from shifting unexpectedly when
+       toggling the order panel on other pages. -->
+  <style>
+    /* Custom styles for the nav bar */
+    .nav-link {
+      /* Replicate Tailwind's px-4 py-2 classes and apply a larger border radius.  This
+         overrides the default nav-link definition in theme.css on the
+         homepage because Tailwind's `@apply` is only available in a
+         full Tailwind build environment.  We manually set padding and
+         radius here to avoid requiring Tailwind to process `@apply` in
+         the browser. */
+      padding-left: 1rem;
+      padding-right: 1rem;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <nav class="nav-wrap grad-nav px-4 py-3">
+    <!-- First row: navigation links.  These anchors remain on a single line. -->
+    <div class="nav-links flex flex-nowrap items-center gap-2">
+      <a href="index.html" class="nav-link hover:bg-blue-700">Home</a>
+      <a href="aud.html" class="nav-link hover:bg-blue-700">Auditoriums</a>
+      <a href="bookings.html" class="nav-link hover:bg-blue-700">Bookings</a>
+      <a href="prime.html" class="nav-link hover:bg-blue-700">Prime</a>
+      <!-- Rename the grid tab to Schedule and add a Gantt tab -->
+      <a href="schedule-grid.html" class="nav-link hover:bg-blue-700">Schedule</a>
+      <a href="gantt.html" class="nav-link hover:bg-blue-700">Gantt</a>
+      <!-- Dashboard tab: show charts summarising schedules -->
+      <a href="dashboard.html" class="nav-link hover:bg-blue-700">Dashboard</a>
+      <!-- Removed separate Data tab; its functionality is now part of the Home page -->
+      <a href="audit.html" class="nav-link hover:bg-blue-700">Audit</a>
+    </div>
+    <!-- Second row: controls.  Include a placeholder to reserve space for the
+         film highlight dropdown even though the home page hides it.  Wrap
+         controls onto their own line and take the full width of the nav. -->
+    <div class="nav-controls flex flex-wrap items-center gap-3 w-full mt-2">
+      <span id="filmHighlightPlaceholder"></span>
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>First</span>
+        <select id="firstShowGlobalSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>Last</span>
+        <select id="lastShowGlobalSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <label class="flex items-center space-x-1 text-white text-sm">
+        <span>Date</span>
+        <div class="flex items-center">
+          <button id="prevDateGlobalBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-l bg-white text-gray-800" title="Previous day">&larr;</button>
+          <input type="text" id="scheduleDateGlobal" placeholder="MM/DD/YYYY" class="border-t border-b border-gray-300 px-2 py-1 text-sm text-gray-800" />
+          <button id="nextDateGlobalBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-r bg-white text-gray-800" title="Next day">&rarr;</button>
+        </div>
+      </label>
+      <button id="copyScheduleGlobalBtn" onclick="openCopyPanel(this, 'scheduleDateGlobal')" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Copy</button>
+    </div>
+    <!-- Swatches removed from navigation bar; they will appear below the header -->
+  </nav>
+  <!-- Colour swatch row: place below the navigation bar on the home page -->
+  <!-- Right‑align the colour swatches under the navigation bar -->
+  <div class="flex flex-wrap gap-2 px-4 py-2 justify-end">
+    <button class="swatch" data-brand-from="#3b82f6" data-brand-to="#4f46e5" style="background-image: linear-gradient(to right,#3b82f6,#4f46e5);"></button>
+    <button class="swatch" data-brand-from="#1e3a8a" data-brand-to="#312e81" style="background-image: linear-gradient(to right,#1e3a8a,#312e81);"></button>
+    <button class="swatch" data-brand-from="#ff8a00" data-brand-to="#ff6a00" style="background-image: linear-gradient(to right,#ff8a00,#ff6a00);"></button>
+    <button class="swatch" data-brand-from="#c2410c" data-brand-to="#a53e0a" style="background-image: linear-gradient(to right,#c2410c,#a53e0a);"></button>
+    <button class="swatch" data-brand-from="#10b981" data-brand-to="#22c55e" style="background-image: linear-gradient(to right,#10b981,#22c55e);"></button>
+    <button class="swatch" data-brand-from="#065f46" data-brand-to="#064e3b" style="background-image: linear-gradient(to right,#065f46,#064e3b);"></button>
+    <button class="swatch" data-brand-from="#8b5cf6" data-brand-to="#7c3aed" style="background-image: linear-gradient(to right,#8b5cf6,#7c3aed);"></button>
+    <button class="swatch" data-brand-from="#6d28d9" data-brand-to="#4c1d95" style="background-image: linear-gradient(to right,#6d28d9,#4c1d95);"></button>
+  </div>
+  <div class="p-6 max-w-5xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">Welcome to Showtime Builder</h1>
+    <p class="mb-4">Select a tab above to manage auditoriums, bookings, build prime schedules or view the schedule grid.</p>
+    <ul class="list-disc pl-6">
+      <li><strong>Auditoriums</strong>: Manage the list of theaters.</li>
+      <li><strong>Bookings</strong>: Assign films to slots for the current week.</li>
+      <li><strong>Prime</strong>: Choose prime times and build cycles for each booking.</li>
+      <li><strong>Schedule</strong>: Interactive grid to adjust individual show times, add manual shows and view the schedule.</li>
+      <li><strong>Order</strong>: View all shows sorted by start time and nudge their start earlier or later in 5‑minute increments.</li>
+      <li><strong>Gantt</strong>: Visual timeline by auditorium to view and drag shows horizontally to adjust start times or vertically to change auditoriums.</li>
+      <li><strong>Audit</strong>: View static reports such as the schedule by film title with gaps between shows.</li>
+    </ul>
+
+    <!-- Site information entry: allows the user to specify the cinema site name and number.
+         These values are saved in the application state and included in JSON exports.
+         When importing a JSON file that contains site information, the fields are pre‑filled. -->
+    <div class="mt-8">
+      <h2 class="text-xl font-semibold mb-4">Site Information</h2>
+      <div class="flex flex-wrap gap-4">
+        <label class="flex items-center space-x-2">
+          <span class="font-medium">Site Name:</span>
+          <input id="siteNameInput" type="text" class="border border-gray-300 rounded px-2 py-1 text-sm" placeholder="Enter site name" />
+        </label>
+        <label class="flex items-center space-x-2">
+          <span class="font-medium">Site Number:</span>
+          <input id="siteNumberInput" type="text" class="border border-gray-300 rounded px-2 py-1 text-sm" placeholder="Enter site number" />
+        </label>
+      </div>
+    </div>
+
+    <!-- Data Export/Import controls formerly on the Data tab.  Placing them here
+         consolidates functionality on the Home page without adding another tab.
+         Users can export their current schedule, import a saved schedule or
+         generate a shows CSV. -->
+    <div class="mt-8">
+      <h2 class="text-xl font-semibold mb-4">Data Export / Import</h2>
+      <p class="mb-4">Export your current schedule to a JSON or CSV file, or import a previously saved JSON file to restore your schedule.</p>
+      <div class="space-y-4">
+        <!-- Standardised button sizing; buttons match those used throughout the app -->
+        <button id="exportJsonBtn" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Export JSON</button>
+        <!-- Add a CSV export button to download a list of all shows across all dates. -->
+        <button id="exportCsvBtn" class="px-3 py-1 bg-green-700 text-white rounded-lg hover:bg-green-800 text-sm">Export CSV</button>
+        <!-- Import JSON file input -->
+        <div class="flex flex-col gap-2">
+          <div>
+            <label class="mr-2 font-medium" for="importFileInput">Import JSON (file):</label>
+            <input id="importFileInput" type="file" accept=".json" class="border border-gray-300 rounded-lg p-1" />
+          </div>
+        </div>
+    <!-- Add buttons to clear schedules and bookings across all dates. Place them side by side. -->
+    <div class="mt-4 flex flex-wrap gap-2">
+      <button id="clearAllSchedulesBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear All Schedules</button>
+      <button id="clearBookingsTimesBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear Bookings and Times</button>
+    </div>
+      </div>
+
+      <!-- Removed theme colour examples section as per user request.  The colour swatch selector remains in the navigation bar above. -->
+    </div>
+    <!-- Bulk Bookings Input: allow users to paste film title, format, runtime and slot
+         separated by commas or tabs.  Format is optional; when omitted, leave it
+         blank.  Runtime and slot must be provided.  Trailer and cleanup times
+         default to 20 minutes.  Each line in the textarea corresponds to one
+         booking.  After clicking the Add button, bookings will be added to
+         the Bookings tab.  Existing blank rows will be reused before
+         appending new rows. -->
+    <div class="mt-8">
+      <h2 class="text-xl font-semibold mb-2">Bulk Bookings Input</h2>
+      <p class="text-sm mb-2 text-gray-600">Paste each booking on a new line in the format:<br>
+        <code>Title, Format (optional), Runtime (minutes), Slot</code><br>
+        For example: <code>The Big Show,IMAX,120,4</code> or <code>The Big Show,120,4</code>.<br>
+        Trailers and clean times will default to 20 minutes.</p>
+      <textarea id="bulkBookingsInput" rows="5" class="w-full border border-gray-300 rounded-lg p-2" placeholder="Paste bookings here..."></textarea>
+      <button id="addBulkBookingsBtn" class="mt-2 px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Add to Bookings</button>
+    </div>
+  </div>
+  <!-- Theme picker script: applies selected colours and persists choice -->
+  <script src="theme.js"></script>
+  <!-- Dense tables toggle: inserts a checkbox into the navigation controls for compact tables -->
+  <script src="dense-toggle.js?v=1"></script>
+  <!-- Dashboard bar script: provides a collapsible bottom panel with summary charts on all pages -->
+  <!-- Load the dashboard bar script with an updated version to bust caches -->
+  <script src="dashboard-bar.js?v=5"></script>
+  <!-- Header controls script: adds first/last show selectors and date picker to pages
+       that do not manage schedules directly.  Populates the controls and updates
+       ShowtimeState when changed. -->
+  <script src="header-controls.js?v=1"></script>
+  <!-- Include data import/export logic on the home page now that the Data tab
+       functionality is merged here.  This script attaches event listeners to
+       the JSON/CSV export buttons and import fields defined above. -->
+  <script src="data.js"></script>
+  <!-- Script for bulk bookings input.  Parses pasted lines and updates the
+       ShowtimeState with new films and bookings.  Handles blank format values,
+       runtime/slot parsing and reuses existing blank booking rows when
+       available. -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const textarea = document.getElementById('bulkBookingsInput');
+      const addBtn = document.getElementById('addBulkBookingsBtn');
+      if (!textarea || !addBtn) return;
+      addBtn.addEventListener('click', () => {
+        const raw = textarea.value || '';
+        // Trim leading/trailing whitespace and normalise line breaks
+        const lines = raw.trim().split(/\n+/).map(l => l.trim()).filter(l => l);
+        if (lines.length === 0) {
+          alert('Please paste at least one booking.');
+          return;
+        }
+        // Load current state; this will initialise if needed
+        const state = ShowtimeState.state;
+        let filmIndexCounter = 1;
+        // Determine numeric parts of film and booking IDs to generate unique IDs
+        const filmNums = state.films
+          .map(f => {
+            const m = String(f.id).match(/^F(\d+)/);
+            return m ? parseInt(m[1], 10) : null;
+          })
+          .filter(n => n !== null);
+        let nextFilmNum = filmNums.length ? Math.max(...filmNums) + 1 : 1;
+        const bookingNums = state.bookings
+          .map(b => {
+            const m = String(b.id).match(/^B(\d+)/);
+            return m ? parseInt(m[1], 10) : null;
+          })
+          .filter(n => n !== null);
+        let nextBookingNum = bookingNums.length ? Math.max(...bookingNums) + 1 : 1;
+        // Determine the next slot number if user omits slot (not supported yet) but keep for future
+        const existingSlots = state.bookings
+          .map(b => parseInt(b.slot, 10))
+          .filter(n => !isNaN(n));
+        let nextSlotNum = existingSlots.length ? Math.max(...existingSlots) + 1 : 1;
+        let addedCount = 0;
+        // Attempt to detect a header row on the first line.  Recognise common
+        // synonyms for title, runtime/duration and slot.  If detected, build a
+        // mapping of column names to indexes and skip the header when parsing.
+        let headerMap = null;
+        if (lines.length > 0) {
+          const firstParts = lines[0].split(/[\t,]/).map(p => p.trim());
+          const lowerParts = firstParts.map(p => p.toLowerCase());
+          const map = {};
+          lowerParts.forEach((h, idx) => {
+            if (['title', 'film title', 'film', 'attraction'].includes(h)) {
+              map.title = idx;
+            } else if (['format', 'fmt'].includes(h)) {
+              // Only treat an explicit format column (Format/Fmt) as the film format.  Do not
+              // treat print or print_ as format because these refer to separate tracking columns.
+              map.format = idx;
+            } else if (['runtime', 'run time', 'duration'].includes(h)) {
+              map.runtime = idx;
+            } else if (['slot', 'screen', 'slot number', 'slot#'].includes(h)) {
+              map.slot = idx;
+            } else if (['comments', 'comment', 'notes'].includes(h)) {
+              map.comments = idx;
+            }
+          });
+          // We consider this a header if we found at least title, runtime and slot columns.
+          if (map.title !== undefined && map.runtime !== undefined && map.slot !== undefined) {
+            headerMap = map;
+            // Remove the header line from the data lines
+            lines.shift();
+          }
+        }
+        // Helper function to parse a row based on either the header map or the
+        // default comma/tab separated format.  Returns null if the row cannot be parsed.
+        function parseRow(row) {
+          if (!row) return null;
+          const cols = row.split(/[\t,]/).map(p => p.trim());
+          let title = '';
+          let format = '';
+          let runtimeVal = '';
+          let slotVal = '';
+          let commentsVal = '';
+          if (headerMap) {
+            // Extract values by header index, falling back to empty strings
+            title = (cols[headerMap.title] || '').trim();
+            format = headerMap.format !== undefined ? (cols[headerMap.format] || '').trim() : '';
+            runtimeVal = (cols[headerMap.runtime] || '').trim();
+            slotVal = (cols[headerMap.slot] || '').trim();
+            commentsVal = headerMap.comments !== undefined ? (cols[headerMap.comments] || '').trim() : '';
+            // If no explicit format column, attempt to split title on colon to derive
+            // format and title only when the prefix is a recognised format (IMAX, 4DX, SX, 3D, RPX).
+            if (!format && title.includes(':')) {
+              const idx = title.indexOf(':');
+              const maybeFmt = title.substring(0, idx).trim();
+              const validFormats = ['imax', '4dx', 'sx', '3d', 'rpx'];
+              if (validFormats.includes(maybeFmt.toLowerCase())) {
+                format = maybeFmt;
+                title = title.substring(idx + 1).trim();
+              }
+            }
+          } else {
+            // Default behaviour: expect at least 3 parts: title[, format], runtime, slot
+            if (cols.length < 3) return null;
+            // The last two parts are runtime and slot
+            slotVal = cols.pop().trim();
+            runtimeVal = cols.pop().trim();
+            // Remaining parts form title and optional format.  The first is title,
+            // second is format; any additional parts are part of the title.
+            if (cols.length === 0) return null;
+            if (cols.length === 1) {
+              title = cols[0];
+              format = '';
+            } else {
+              title = cols[0];
+              format = cols[1] || '';
+              if (cols.length > 2) {
+                title += ', ' + cols.slice(2).join(', ');
+              }
+            }
+            // Attempt to derive format from title only when the prefix is a recognised format (IMAX, 4DX, SX, 3D, RPX).
+            if (!format && title.includes(':')) {
+              const idx = title.indexOf(':');
+              const maybeFmt = title.substring(0, idx).trim();
+              const validFormats = ['imax', '4dx', 'sx', '3d', 'rpx'];
+              if (validFormats.includes(maybeFmt.toLowerCase())) {
+                format = maybeFmt;
+                title = title.substring(idx + 1).trim();
+              }
+            }
+            commentsVal = '';
+          }
+          // Parse runtime as integer minutes
+          const runtime = parseInt(runtimeVal || '', 10);
+          // Trim title to a maximum of 18 characters when importing bookings.  This
+          // truncation preserves the leftmost portion of the title to ensure that
+          // long titles do not overflow limited column widths in the bookings and
+          // schedule grids.  See user request to limit imported titles to 18
+          // characters.
+          if (title) {
+            title = title.substring(0, 18);
+          }
+          if (!title || isNaN(runtime) || !slotVal) {
+            return null;
+          }
+          return { title, format, runtime, slot: slotVal, comments: commentsVal };
+        }
+        lines.forEach(line => {
+          const parsed = parseRow(line);
+          if (!parsed) return;
+          const { title, format, runtime, slot, comments } = parsed;
+          // Find existing film by title (case insensitive) and format if provided
+          const titleLC = title.toLowerCase();
+          let film = state.films.find(f => f.title && f.title.toLowerCase() === titleLC && (format ? ((f.format || '').toLowerCase() === format.toLowerCase()) : true));
+          // If film exists but runtime differs, update runtime; also update format if provided
+          if (film) {
+            if (film.runtime !== runtime) {
+              film.runtime = runtime;
+            }
+            if (format && (!film.format || film.format.toLowerCase() !== format.toLowerCase())) {
+              film.format = format;
+            }
+            // Clear any existing priority on reused films to avoid automatically populating
+            // the Priority column.  We want imported films to have blank priority so
+            // users can assign a value manually.
+            film.priority = '';
+          } else {
+            // Create new film record.  Do not preset the priority; leave it
+            // blank so that the Priority column is not auto-populated.  This
+            // ensures users can assign priorities manually after import.
+            const newFilmId = 'F' + nextFilmNum++;
+            film = {
+              id: newFilmId,
+              title: title,
+              runtime: runtime,
+              trailer: 20,
+              clean: 20,
+              priority: '',
+              rating: '',
+              format: format,
+            };
+            state.films.push(film);
+          }
+          // Determine if there is an existing blank booking row (film title is empty)
+          let blankIndex = -1;
+          for (let i = 0; i < state.bookings.length; i++) {
+            const b = state.bookings[i];
+            const f = ShowtimeState.filmById(b.filmId);
+            if (!f || !f.title) {
+              blankIndex = i;
+              break;
+            }
+          }
+          let booking;
+          if (blankIndex !== -1) {
+            // Reuse blank row.  Update slot and filmId, and clear out
+            // any pre-set week or weeksOut values so that Week column is not
+            // auto-populated.  Also preserve or set notes from comments.
+            booking = state.bookings[blankIndex];
+            booking.slot = slot;
+            booking.filmId = film.id;
+            // Clear week and weeksOut to avoid auto-filling the Week column
+            booking.week = '';
+            booking.weeksOut = '';
+            if (comments) {
+              booking.notes = comments;
+            }
+          } else {
+            // Create new booking.  Do not preset the week number or weeksOut; leave them blank
+            // so that the Week column is not automatically filled.  Notes are carried over if comments present.
+            const newBookingId = 'B' + nextBookingNum++;
+            booking = {
+              id: newBookingId,
+              week: '',
+              slot: slot,
+              filmId: film.id,
+              notes: comments || '',
+              weeksOut: '',
+            };
+            state.bookings.push(booking);
+          }
+          addedCount++;
+        });
+        // If any bookings added, persist state and alert user
+        if (addedCount > 0) {
+          ShowtimeState.save();
+          // Persist the updated state and reload pages on other tabs by dispatching storage event
+          window.dispatchEvent(new StorageEvent('storage', { key: 'showtime:persist', newValue: JSON.stringify(state) }));
+          alert(`Added ${addedCount} booking${addedCount === 1 ? '' : 's'} successfully.`);
+          // Clear textarea
+          textarea.value = '';
+          // Refresh the film highlight dropdown and apply highlight in case new films
+          // were added.  These functions are defined globally in app.js.
+          try {
+            if (typeof window.refreshFilmHighlightOptions === 'function') {
+              window.refreshFilmHighlightOptions();
+            }
+            if (typeof window.applyFilmHighlight === 'function') {
+              window.applyFilmHighlight();
+            }
+          } catch (e) {}
+        } else {
+          alert('No valid bookings were parsed. Please check your input format.');
+        }
+      });
+    });
+  </script>
+
+  <!-- Persist and restore site information (name and number).  On page load,
+       populate the input fields from the application state.  When the
+       user edits either field, update the state and save it to
+       localStorage.  This ensures that site details appear in JSON
+       exports and reload automatically on subsequent visits. -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Ensure state is initialised
+      try { ShowtimeState.load(); } catch (e) { /* ignore */ }
+      const nameInput = document.getElementById('siteNameInput');
+      const numInput = document.getElementById('siteNumberInput');
+      if (nameInput) {
+        nameInput.value = (ShowtimeState.state && ShowtimeState.state.siteName) || '';
+        nameInput.addEventListener('input', () => {
+          ShowtimeState.state.siteName = nameInput.value;
+          ShowtimeState.save();
+        });
+      }
+      if (numInput) {
+        numInput.value = (ShowtimeState.state && ShowtimeState.state.siteNumber) || '';
+        numInput.addEventListener('input', () => {
+          ShowtimeState.state.siteNumber = numInput.value;
+          ShowtimeState.save();
+        });
+      }
+    });
+  </script>
+</body>
+</html>
