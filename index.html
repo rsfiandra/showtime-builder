@@ -56,6 +56,7 @@
       <button type="button" class="nav-link hover:bg-blue-700" data-view-target="prime" data-fallback-href="prime.html">Prime</button>
       <!-- Rename the grid tab to Schedule and add a Gantt tab -->
       <button type="button" class="nav-link hover:bg-blue-700" data-view-target="schedule" data-fallback-href="schedule-grid.html">Schedule</button>
+      <button type="button" class="nav-link hover:bg-blue-700" data-view-target="order" data-fallback-href="order.html">Order</button>
       <button type="button" class="nav-link hover:bg-blue-700" data-view-target="gantt" data-fallback-href="gantt.html">Gantt</button>
       <!-- Dashboard tab: show charts summarising schedules -->
       <button type="button" class="nav-link hover:bg-blue-700" data-view-target="dashboard" data-fallback-href="dashboard.html">Dashboard</button>
@@ -112,6 +113,21 @@
         <li><strong>Gantt</strong>: Visual timeline by auditorium to view and drag shows horizontally to adjust start times or vertically to change auditoriums.</li>
         <li><strong>Audit</strong>: View static reports such as the schedule by film title with gaps between shows.</li>
       </ul>
+
+      <div class="mt-6 bg-white/70 border border-slate-200 rounded-xl shadow-sm p-4">
+        <h2 class="text-lg font-semibold mb-3">Single-file migration checklist</h2>
+        <ul class="space-y-2 text-sm text-gray-700">
+          <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Navigation shell &amp; home view</span></li>
+          <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Auditoriums view inlined</span></li>
+          <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Bookings view inlined</span></li>
+          <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Prime schedule view inlined</span></li>
+          <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Schedule grid view inlined</span></li>
+          <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Start-time order view inlined</span></li>
+          <li class="flex items-center gap-2"><input type="checkbox" disabled class="accent-blue-600" /><span>Gantt timeline view inlined</span></li>
+          <li class="flex items-center gap-2"><input type="checkbox" disabled class="accent-blue-600" /><span>Dashboard analytics view inlined</span></li>
+          <li class="flex items-center gap-2"><input type="checkbox" disabled class="accent-blue-600" /><span>Audit reports view inlined</span></li>
+        </ul>
+      </div>
 
       <!-- Site information entry: allows the user to specify the cinema site name and number.
            These values are saved in the application state and included in JSON exports.
@@ -330,6 +346,70 @@
         </div>
       </div>
     </section>
+
+    <section data-view="schedule" hidden>
+      <div class="px-6 pt-4 pb-6 space-y-4">
+        <header class="flex flex-wrap items-center gap-3 bg-white/60 rounded-xl px-4 py-3 shadow">
+          <div class="flex items-center gap-2">
+            <label class="flex items-center gap-2 text-sm">
+              <span class="font-medium">First</span>
+              <select id="firstShowSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+            </label>
+            <label class="flex items-center gap-2 text-sm">
+              <span class="font-medium">Last</span>
+              <select id="lastShowSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+            </label>
+          </div>
+          <div class="flex items-center gap-2 text-sm">
+            <span class="font-medium">Date</span>
+            <div class="flex items-center">
+              <button id="prevDateGridBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-l bg-white text-gray-800" title="Previous day">&larr;</button>
+              <input type="text" id="scheduleDateGrid" placeholder="MM/DD/YYYY" class="border-t border-b border-gray-300 px-2 py-1 text-sm text-gray-800" />
+              <button id="nextDateGridBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-r bg-white text-gray-800" title="Next day">&rarr;</button>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 ml-auto">
+            <button id="clearTimesGridBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear Times</button>
+            <button id="copyScheduleGridBtn" onclick="openCopyPanel(this, 'scheduleDateGrid')" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Copy</button>
+          </div>
+        </header>
+        <div class="flex flex-wrap items-center gap-3">
+          <button id="addRowBtn" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Add Row</button>
+          <button id="toggleEndBtn" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Hide End Times</button>
+          <button id="undoBtn" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Undo</button>
+          <button id="sortRowsBtn" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Sort Auds</button>
+        </div>
+        <div class="overflow-x-auto">
+          <div class="card-table dense-schedule" data-nav-grid>
+            <table>
+              <thead id="gridHead" class="grad-header text-sm"></thead>
+              <tbody id="gridBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <p class="text-xs text-gray-600">Type a time (e.g., 7a or 705a) in an empty cell to add a manual show at that time. Changing a time only affects that show, not the entire row. Use Undo to revert the most recent change.</p>
+      </div>
+    </section>
+
+    <section data-view="order" hidden>
+      <div class="px-6 pt-4 pb-6">
+        <div class="overflow-x-auto">
+          <table class="w-full rounded-xl overflow-hidden ring-1 ring-slate-200 shadow bg-white text-sm text-gray-800">
+            <thead class="grad-header text-xs uppercase tracking-wide sticky top-0 z-10 text-white/90">
+              <tr>
+                <th class="px-2 py-1 text-left">Start</th>
+                <th class="px-2 py-1 text-left">Clean</th>
+                <th class="px-2 py-1 text-left">Aud</th>
+                <th class="px-2 py-1 text-left">Film</th>
+                <th class="px-2 py-1 text-left">Nudge</th>
+              </tr>
+            </thead>
+            <tbody id="orderBody" class="text-sm"></tbody>
+          </table>
+        </div>
+        <p class="text-sm text-gray-600 mt-3">Use the ▲/▼ buttons to nudge show start times earlier or later in 5‑minute increments. These changes persist across all views.</p>
+      </div>
+    </section>
   </main>
   <script>
     (function() {
@@ -382,6 +462,8 @@
   <script src="aud.js?v=15"></script>
   <script src="bookings.js?v=16"></script>
   <script src="prime.js?v=6"></script>
+  <script src="schedule-grid.js?v=26"></script>
+  <script src="order.js?v=3"></script>
   <!-- Theme picker script: applies selected colours and persists choice -->
   <script src="theme.js"></script>
   <!-- Dense tables toggle: inserts a checkbox into the navigation controls for compact tables -->
