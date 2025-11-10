@@ -733,6 +733,48 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
   min-height: 1.5rem;
 }
 
+  /* Additional Tailwind utility shims to restore original visuals */
+  .accent-blue-600 {accent-color:#2563eb;}
+  .align-middle {vertical-align:middle;}
+  .align-top {vertical-align:top;}
+  .appearance-none {-moz-appearance:none;-webkit-appearance:none;appearance:none;background-image:none;}
+  .bg-purple-50 {background-color:#f5f3ff;}
+  .bg-slate-50 {background-color:#f8fafc;}
+  .border-dashed {border-style:dashed;}
+  .border-gray-100 {border-color:#f3f4f6;}
+  .border-purple-500 {border-color:#a855f7;}
+  .border-slate-100 {border-color:#f1f5f9;}
+  .border-slate-200 {border-color:#e2e8f0;}
+  .dt-overlay {border-radius:0.5rem;pointer-events:none;}
+  .even\:bg-gray-50:nth-child(even) {background-color:#f9fafb;}
+  .even\:bg-slate-50:nth-child(even) {background-color:#f8fafc;}
+  .hover\:text-red-900:hover {color:#7f1d1d;}
+  .invisible {visibility:hidden;}
+  .last\:border-0:last-child {border-bottom-width:0;}
+  .late-first-badge {display:inline-flex;align-items:center;font-weight:600;line-height:1;border-radius:0.25rem;}
+  .md\:grid-cols-1 {display:grid;grid-template-columns:repeat(1,minmax(0,1fr));}
+  .md\:grid-cols-2 {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));}
+  .nav-controls {display:flex;flex-wrap:wrap;align-items:center;gap:0.75rem;width:100%;}
+  .odd\:bg-white:nth-child(odd) {background-color:#ffffff;}
+  .table-fixed {table-layout:fixed;}
+  .tabular-nums {font-variant-numeric:tabular-nums;font-feature-settings:'tnum';}
+  .text-center {text-align:center;}
+  .text-left {text-align:left;}
+  .text-right {text-align:right;}
+  .transition-colors {transition-property:color,background-color,border-color,text-decoration-color,fill,stroke;transition-duration:150ms;transition-timing-function:cubic-bezier(0.4,0,0.2,1);}
+  .xl\:grid-cols-4 {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));}
+
+  /* Ring helpers rely on CSS variables so colour utilities stack correctly */
+  :root {--ring-offset-color:#ffffff;}
+  .ring-1 {box-shadow:0 0 0 calc(1px + var(--ring-offset-width,0px)) var(--ring-color,rgba(15,23,42,0.12)),0 0 0 var(--ring-offset-width,0px) var(--ring-offset-color,#ffffff);}
+  .ring-2 {box-shadow:0 0 0 calc(2px + var(--ring-offset-width,0px)) var(--ring-color,rgba(15,23,42,0.15)),0 0 0 var(--ring-offset-width,0px) var(--ring-offset-color,#ffffff);}
+  .ring-offset-1 {--ring-offset-width:1px;}
+  .ring-blue-400 {--ring-color:#60a5fa;}
+  .ring-purple-400 {--ring-color:#c084fc;}
+  .ring-slate-200 {--ring-color:#e2e8f0;}
+
+  @media (min-width:768px){.md\:grid-cols-1 {display:grid;grid-template-columns:repeat(1,minmax(0,1fr));}.md\:grid-cols-2 {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));}}
+  @media (min-width:1280px){.xl\:grid-cols-4 {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));}}
   </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
