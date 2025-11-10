@@ -1185,57 +1185,24 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
         <div class="grid md:grid-cols-2 gap-8">
           <div class="bg-white shadow rounded-lg p-4">
             <h2 class="text-lg font-semibold mb-2">Shows by Film</h2>
-            <table class="min-w-full table-fixed w-full rounded-lg overflow-hidden ring-1 ring-slate-200">
-              <thead class="grad-header text-xs">
-                <tr>
-                  <th class="px-2 py-1 text-left">Film</th>
-                  <th class="px-2 py-1 text-right">Shows</th>
-                </tr>
-              </thead>
-              <tbody id="filmSummaryBody" class="divide-y divide-gray-200 text-sm"></tbody>
-            </table>
+            <canvas id="filmChart" height="250" style="max-height:250px;"></canvas>
           </div>
           <div class="bg-white shadow rounded-lg p-4">
             <h2 class="text-lg font-semibold mb-2">Shows by Auditorium</h2>
-            <table class="min-w-full table-fixed w-full rounded-lg overflow-hidden ring-1 ring-slate-200">
-              <thead class="grad-header text-xs">
-                <tr>
-                  <th class="px-2 py-1 text-left">Auditorium</th>
-                  <th class="px-2 py-1 text-right">Shows</th>
-                </tr>
-              </thead>
-              <tbody id="audSummaryBody" class="divide-y divide-gray-200 text-sm"></tbody>
-            </table>
+            <canvas id="audChart" height="250" style="max-height:250px;"></canvas>
           </div>
         </div>
         <div class="grid md:grid-cols-1 gap-8 mt-8">
           <div class="bg-white shadow rounded-lg p-4">
             <h2 class="text-lg font-semibold mb-2">Start &amp; End Time Distribution (per hour)</h2>
-            <table class="min-w-full table-fixed w-full rounded-lg overflow-hidden ring-1 ring-slate-200">
-              <thead class="grad-header text-xs">
-                <tr>
-                  <th class="px-2 py-1 text-left">Hour</th>
-                  <th class="px-2 py-1 text-right">Starts</th>
-                  <th class="px-2 py-1 text-right">Seats</th>
-                  <th class="px-2 py-1 text-right">Ends</th>
-                </tr>
-              </thead>
-              <tbody id="timeSummaryBody" class="divide-y divide-gray-200 text-sm"></tbody>
-            </table>
+            <canvas id="timeChart" height="250" style="max-height:250px;"></canvas>
+            <canvas id="endTimeChart" height="250" style="max-height:250px; margin-top: 1rem;"></canvas>
           </div>
         </div>
         <div class="grid md:grid-cols-1 gap-8 mt-8">
           <div class="bg-white shadow rounded-lg p-4">
             <h2 class="text-lg font-semibold mb-2">Auditorium Utilisation</h2>
-            <table class="min-w-full table-fixed w-full rounded-lg overflow-hidden ring-1 ring-slate-200">
-              <thead class="grad-header text-xs">
-                <tr>
-                  <th class="px-2 py-1 text-left">Auditorium</th>
-                  <th class="px-2 py-1 text-right">Utilisation</th>
-                </tr>
-              </thead>
-              <tbody id="utilSummaryBody" class="divide-y divide-gray-200 text-sm"></tbody>
-            </table>
+            <canvas id="utilChart" height="250" style="max-height:250px;"></canvas>
           </div>
         </div>
         <div class="bg-white shadow rounded-lg p-4">
@@ -1404,6 +1371,344 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
     })();
   </script>
       <script>
+// chartjs-lite.js
+(function() {
+  const globalObj = typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : {});
+  if (globalObj.Chart) return;
+
+  class MiniChart {
+    constructor(ctx, config) {
+      this.canvas = ctx && ctx.canvas ? ctx.canvas : ctx;
+      this.ctx = ctx && ctx.getContext ? ctx : (this.canvas && this.canvas.getContext ? this.canvas.getContext('2d') : null);
+      this.config = config || {};
+      this.type = this.config.type || 'bar';
+      this.data = this.config.data || { labels: [], datasets: [] };
+      this.options = this.config.options || {};
+      this.config.data = this.data;
+      this.config.options = this.options;
+      this._destroyed = false;
+      this._area = { width: (this.canvas && this.canvas.width) || 0, height: (this.canvas && this.canvas.height) || 0 };
+      this._draw();
+    }
+
+    update() {
+      if (this._destroyed) return;
+      this._draw();
+    }
+
+    destroy() {
+      if (!this.ctx || !this.canvas) return;
+      this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this._destroyed = true;
+    }
+
+    _resize() {
+      if (!this.canvas || !this.ctx) return;
+      const ratio = (typeof window !== 'undefined' && window.devicePixelRatio) ? window.devicePixelRatio : 1;
+      const parent = this.canvas.parentElement;
+      let width = parent ? parent.clientWidth : 0;
+      if (!width || width < 10) {
+        const attr = this.canvas.getAttribute('width');
+        if (attr) {
+          const parsed = parseInt(attr, 10);
+          if (!isNaN(parsed)) width = parsed;
+        }
+      }
+      if (!width || width < 10) {
+        width = this._area && this._area.width ? this._area.width : 600;
+      }
+      let height = 0;
+      const attrHeight = this.canvas.getAttribute('height');
+      if (attrHeight) {
+        const parsed = parseInt(attrHeight, 10);
+        if (!isNaN(parsed)) height = parsed;
+      }
+      if (!height || height < 10) {
+        if (this._area && this._area.height) {
+          height = this._area.height;
+        } else if (parent && parent.clientHeight) {
+          height = parent.clientHeight;
+        } else {
+          height = 300;
+        }
+      }
+      this.canvas.style.width = width + 'px';
+      this.canvas.style.height = height + 'px';
+      this.canvas.width = width * ratio;
+      this.canvas.height = height * ratio;
+      this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+      if (ratio !== 1) {
+        this.ctx.scale(ratio, ratio);
+      }
+      this._area = { width, height };
+    }
+
+    _clear() {
+      if (!this.ctx || !this._area) return;
+      this.ctx.clearRect(0, 0, this._area.width, this._area.height);
+      this.ctx.fillStyle = '#ffffff';
+      this.ctx.fillRect(0, 0, this._area.width, this._area.height);
+    }
+
+    _draw() {
+      if (!this.ctx) return;
+      this._resize();
+      this._clear();
+      const labels = (this.data && this.data.labels) ? this.data.labels : [];
+      const datasets = (this.data && this.data.datasets) ? this.data.datasets : [];
+      if (!labels.length && !datasets.some(ds => (ds && ds.data && ds.data.length))) {
+        return;
+      }
+      if (this.type === 'line') {
+        this._drawLine(labels, datasets);
+        return;
+      }
+      const dataset = datasets[0] || { data: [] };
+      const indexAxis = (this.options && this.options.indexAxis) || 'x';
+      if (indexAxis === 'y') {
+        this._drawBarHorizontal(labels, dataset);
+      } else {
+        this._drawBarVertical(labels, dataset);
+      }
+    }
+
+    _drawLegend(datasets, margin) {
+      if (!this.ctx || !datasets || !datasets.length) return;
+      const ctx = this.ctx;
+      const y = margin.top - 20;
+      if (y < 12) return;
+      let x = margin.left;
+      ctx.font = '12px Inter, system-ui, sans-serif';
+      ctx.textBaseline = 'middle';
+      datasets.forEach(ds => {
+        if (!ds || !ds.label) return;
+        const colour = ds.borderColor || ds.backgroundColor || '#2563eb';
+        ctx.fillStyle = colour;
+        ctx.fillRect(x, y - 5, 10, 10);
+        ctx.fillStyle = '#1f2937';
+        ctx.fillText(String(ds.label), x + 14, y);
+        x += ctx.measureText(String(ds.label)).width + 40;
+      });
+    }
+
+    _drawBarVertical(labels, dataset) {
+      if (!this.ctx || !this._area) return;
+      const ctx = this.ctx;
+      const width = this._area.width;
+      const height = this._area.height;
+      const margin = { top: 20, right: 24, bottom: 60, left: 60 };
+      const plotWidth = Math.max(10, width - margin.left - margin.right);
+      const plotHeight = Math.max(10, height - margin.top - margin.bottom);
+      const values = Array.isArray(dataset.data) ? dataset.data.map(v => Number(v) || 0) : [];
+      const maxValue = values.length ? Math.max(...values, 0) : 0;
+      const safeMax = maxValue > 0 ? maxValue : 1;
+      const barSpace = labels.length ? plotWidth / labels.length : plotWidth;
+      const barWidth = barSpace * 0.6;
+
+      ctx.strokeStyle = '#d1d5db';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(margin.left, margin.top);
+      ctx.lineTo(margin.left, margin.top + plotHeight);
+      ctx.lineTo(margin.left + plotWidth, margin.top + plotHeight);
+      ctx.stroke();
+
+      ctx.fillStyle = dataset.backgroundColor || '#3b82f6';
+      labels.forEach((label, idx) => {
+        const value = values[idx] || 0;
+        const barHeight = (Math.max(value, 0) / safeMax) * plotHeight;
+        const x = margin.left + barSpace * idx + (barSpace - barWidth) / 2;
+        const y = margin.top + plotHeight - barHeight;
+        ctx.fillStyle = dataset.backgroundColor || '#3b82f6';
+        ctx.fillRect(x, y, barWidth, barHeight);
+      });
+
+      ctx.font = '12px Inter, system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      labels.forEach((label, idx) => {
+        const x = margin.left + barSpace * idx + barSpace / 2;
+        ctx.fillStyle = '#1f2937';
+        ctx.fillText(String(label), x, height - margin.bottom + 8);
+      });
+
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#1f2937';
+      for (let i = 0; i <= 4; i++) {
+        const value = safeMax * (i / 4);
+        const y = margin.top + plotHeight - (plotHeight * (i / 4));
+        ctx.fillText(Math.round(value).toString(), margin.left - 6, y);
+        ctx.beginPath();
+        ctx.moveTo(margin.left - 4, y);
+        ctx.lineTo(margin.left, y);
+        ctx.stroke();
+      }
+    }
+
+    _drawBarHorizontal(labels, dataset) {
+      if (!this.ctx || !this._area) return;
+      const ctx = this.ctx;
+      const width = this._area.width;
+      const height = this._area.height;
+      const margin = { top: 20, right: 90, bottom: 30, left: 160 };
+      const plotWidth = Math.max(10, width - margin.left - margin.right);
+      const plotHeight = Math.max(10, height - margin.top - margin.bottom);
+      const values = Array.isArray(dataset.data) ? dataset.data.map(v => Number(v) || 0) : [];
+      const maxValue = values.length ? Math.max(...values, 0) : 0;
+      const safeMax = maxValue > 0 ? maxValue : 1;
+      const barSpace = labels.length ? plotHeight / labels.length : plotHeight;
+      const barHeight = barSpace * 0.6;
+
+      ctx.strokeStyle = '#d1d5db';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(margin.left, margin.top);
+      ctx.lineTo(margin.left, margin.top + plotHeight);
+      ctx.lineTo(margin.left + plotWidth, margin.top + plotHeight);
+      ctx.stroke();
+
+      ctx.font = '12px Inter, system-ui, sans-serif';
+      labels.forEach((label, idx) => {
+        const value = values[idx] || 0;
+        const barLength = (Math.max(value, 0) / safeMax) * plotWidth;
+        const y = margin.top + barSpace * idx + (barSpace - barHeight) / 2;
+        ctx.fillStyle = dataset.backgroundColor || '#3b82f6';
+        ctx.fillRect(margin.left, y, barLength, barHeight);
+
+        ctx.fillStyle = '#1f2937';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(String(label), margin.left - 10, y + barHeight / 2);
+
+        ctx.textAlign = 'left';
+        ctx.fillText(String(value), margin.left + barLength + 8, y + barHeight / 2);
+      });
+
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillStyle = '#1f2937';
+      const tickCount = 4;
+      for (let i = 0; i <= tickCount; i++) {
+        const value = safeMax * (i / tickCount);
+        const x = margin.left + plotWidth * (i / tickCount);
+        ctx.fillText(Math.round(value).toString(), x, margin.top + plotHeight + 6);
+        ctx.beginPath();
+        ctx.moveTo(x, margin.top + plotHeight);
+        ctx.lineTo(x, margin.top + plotHeight + 4);
+        ctx.stroke();
+      }
+    }
+
+    _drawLine(labels, datasets) {
+      if (!this.ctx || !this._area) return;
+      const ctx = this.ctx;
+      const width = this._area.width;
+      const height = this._area.height;
+      const margin = { top: 50, right: 60, bottom: 50, left: 60 };
+      const plotWidth = Math.max(10, width - margin.left - margin.right);
+      const plotHeight = Math.max(10, height - margin.top - margin.bottom);
+
+      const leftSets = datasets.filter(ds => !(ds && ds.yAxisID === 'y1'));
+      const rightSets = datasets.filter(ds => ds && ds.yAxisID === 'y1');
+      const leftMax = this._maxForDatasets(leftSets) || 1;
+      const rightMax = this._maxForDatasets(rightSets) || 1;
+
+      ctx.strokeStyle = '#d1d5db';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(margin.left, margin.top);
+      ctx.lineTo(margin.left, margin.top + plotHeight);
+      ctx.lineTo(margin.left + plotWidth, margin.top + plotHeight);
+      ctx.stroke();
+
+      const step = labels.length > 1 ? plotWidth / (labels.length - 1) : 0;
+      const centreX = margin.left + plotWidth / 2;
+
+      datasets.forEach(ds => {
+        if (!ds || !Array.isArray(ds.data)) return;
+        const axis = ds.yAxisID === 'y1' ? 'right' : 'left';
+        const color = ds.borderColor || ds.backgroundColor || '#2563eb';
+        const max = axis === 'right' ? rightMax : leftMax;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ds.data.forEach((value, idx) => {
+          const x = labels.length > 1 ? margin.left + step * idx : centreX;
+          const pct = max > 0 ? (Math.max(Number(value) || 0, 0) / max) : 0;
+          const y = margin.top + plotHeight - pct * plotHeight;
+          if (idx === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        ctx.fillStyle = color;
+        ds.data.forEach((value, idx) => {
+          const x = labels.length > 1 ? margin.left + step * idx : centreX;
+          const pct = max > 0 ? (Math.max(Number(value) || 0, 0) / max) : 0;
+          const y = margin.top + plotHeight - pct * plotHeight;
+          ctx.beginPath();
+          ctx.arc(x, y, ds.pointRadius || 3, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      });
+
+      ctx.font = '12px Inter, system-ui, sans-serif';
+      ctx.fillStyle = '#1f2937';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      labels.forEach((label, idx) => {
+        const x = labels.length > 1 ? margin.left + step * idx : centreX;
+        ctx.fillText(String(label), x, margin.top + plotHeight + 8);
+      });
+
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#1f2937';
+      for (let i = 0; i <= 4; i++) {
+        const value = leftMax * (i / 4);
+        const y = margin.top + plotHeight - (plotHeight * (i / 4));
+        ctx.fillText(Math.round(value).toString(), margin.left - 6, y);
+        ctx.beginPath();
+        ctx.moveTo(margin.left - 4, y);
+        ctx.lineTo(margin.left, y);
+        ctx.stroke();
+      }
+
+      if (rightSets.length) {
+        ctx.textAlign = 'left';
+        for (let i = 0; i <= 4; i++) {
+          const value = rightMax * (i / 4);
+          const y = margin.top + plotHeight - (plotHeight * (i / 4));
+          ctx.fillText(Math.round(value).toString(), margin.left + plotWidth + 6, y);
+          ctx.beginPath();
+          ctx.moveTo(margin.left + plotWidth, y);
+          ctx.lineTo(margin.left + plotWidth + 4, y);
+          ctx.stroke();
+        }
+      }
+
+      this._drawLegend(datasets, margin);
+    }
+
+    _maxForDatasets(datasets) {
+      if (!datasets || !datasets.length) return 0;
+      let max = 0;
+      datasets.forEach(ds => {
+        if (!ds || !Array.isArray(ds.data)) return;
+        ds.data.forEach(val => {
+          const num = Math.max(Number(val) || 0, 0);
+          if (num > max) max = num;
+        });
+      });
+      return max;
+    }
+  }
+
+  globalObj.Chart = MiniChart;
+})();
+
 // app.js
 // Global state and utilities for the showtime builder application.
 // This script is included on every page. It exposes a ShowtimeState
@@ -7858,12 +8163,29 @@ if (document.readyState === 'loading') {
 
 
 // dashboard-inline.js
-(function() {
+(() => {
   const ShowtimeState = window.ShowtimeState;
   if (!ShowtimeState) return;
 
+  let initialized = false;
+  let filmChart = null;
+  let audChart = null;
+  let timeChart = null;
+  let utilChart = null;
+  let endTimeChart = null;
+
+  const GAP_THRESHOLD_MIN = 45;
+  const GAP_HUGE_MIN = 90;
+  const FIT_SLOT_MIN = 105;
+
   function initDashboardPage() {
     if (!ShowtimeState) return;
+    if (initialized) {
+      updateCharts();
+      return;
+    }
+    initialized = true;
+
     try {
       if (typeof ShowtimeState.initDateSupport === 'function') {
         ShowtimeState.initDateSupport();
@@ -7872,79 +8194,63 @@ if (document.readyState === 'loading') {
 
     const dateInput = document.getElementById('scheduleDateGlobal');
     if (dateInput) {
-      dateInput.addEventListener('change', () => updateSummaries());
+      dateInput.addEventListener('change', () => updateCharts());
     }
+
     const firstSel = document.getElementById('firstShowGlobalSelect');
     if (firstSel) {
-      firstSel.addEventListener('change', () => updateSummaries());
+      firstSel.addEventListener('change', () => updateCharts());
     }
+
     const lastSel = document.getElementById('lastShowGlobalSelect');
     if (lastSel) {
-      lastSel.addEventListener('change', () => updateSummaries());
+      lastSel.addEventListener('change', () => updateCharts());
     }
 
-    updateSummaries();
-
-    window.addEventListener('showtimeViewActivated', evt => {
+    window.addEventListener('showtimeViewActivated', (evt) => {
       const detail = evt && evt.detail;
       const view = detail && detail.view ? detail.view : evt && evt.view;
       if (view === 'dashboard') {
-        updateSummaries();
+        updateCharts();
       }
     });
+
+    window.addEventListener('showtimeStateUpdated', () => {
+      const host = document.getElementById('viewHost');
+      if (!host || host.dataset.currentView === 'dashboard') {
+        updateCharts();
+      }
+    });
+
+    window.addEventListener('showtimeDateChanged', () => {
+      const host = document.getElementById('viewHost');
+      if (!host || host.dataset.currentView === 'dashboard') {
+        updateCharts();
+      }
+    });
+
+    updateCharts();
   }
 
-  function clear(node) {
-    if (!node) return;
-    while (node.firstChild) {
-      node.removeChild(node.firstChild);
+  function updateCharts() {
+    if (!ShowtimeState) return;
+    const filmCanvas = document.getElementById('filmChart');
+    const audCanvas = document.getElementById('audChart');
+    const timeCanvas = document.getElementById('timeChart');
+    const endCanvas = document.getElementById('endTimeChart');
+    const utilCanvas = document.getElementById('utilChart');
+    if (!filmCanvas || !audCanvas || !timeCanvas || !endCanvas || !utilCanvas) {
+      return;
     }
-  }
 
-  function createCell(content, className) {
-    const td = document.createElement('td');
-    td.className = className || '';
-    if (content instanceof Node) {
-      td.appendChild(content);
-    } else {
-      td.textContent = content == null ? '' : String(content);
-    }
-    return td;
-  }
+    try {
+      if (typeof ShowtimeState.load === 'function') {
+        ShowtimeState.load();
+      }
+    } catch (_) {}
 
-  function createBar(value, max, suffix) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'summary-bar-wrapper';
-    const valueRow = document.createElement('div');
-    valueRow.className = 'summary-bar-value';
-    valueRow.textContent = suffix ? `${value}${suffix}` : `${value}`;
-    const track = document.createElement('div');
-    track.className = 'summary-bar-track';
-    const bar = document.createElement('div');
-    bar.className = 'summary-bar';
-    const pct = max > 0 ? Math.max(0, Math.min(100, (value / max) * 100)) : 0;
-    bar.style.width = `${pct}%`;
-    track.appendChild(bar);
-    wrapper.appendChild(valueRow);
-    wrapper.appendChild(track);
-    return wrapper;
-  }
-
-  function updateSummaries() {
-    const filmBody = document.getElementById('filmSummaryBody');
-    const audBody = document.getElementById('audSummaryBody');
-    const timeBody = document.getElementById('timeSummaryBody');
-    const utilBody = document.getElementById('utilSummaryBody');
-    const flaggedContainer = document.getElementById('flaggedList');
-
-    clear(filmBody);
-    clear(audBody);
-    clear(timeBody);
-    clear(utilBody);
-    clear(flaggedContainer);
-
-    const shows = (ShowtimeState && typeof ShowtimeState.getAllShows === 'function')
-      ? ShowtimeState.getAllShows() || []
+    const shows = (typeof ShowtimeState.getAllShows === 'function')
+      ? (ShowtimeState.getAllShows() || [])
       : [];
 
     const filmCounts = new Map();
@@ -7956,14 +8262,17 @@ if (document.readyState === 'loading') {
     shows.forEach(rec => {
       const filmName = rec.filmTitle || rec.filmId || 'Unknown';
       filmCounts.set(filmName, (filmCounts.get(filmName) || 0) + 1);
+
       const audName = rec.audName || 'Unassigned';
       audCounts.set(audName, (audCounts.get(audName) || 0) + 1);
+
       const start = rec.start instanceof Date ? rec.start : new Date(rec.start);
       const hr = start.getHours();
       hourCounts.set(hr, (hourCounts.get(hr) || 0) + 1);
+
       let seats = 0;
       try {
-        if (ShowtimeState.audById && rec.audId != null) {
+        if (typeof ShowtimeState.audById === 'function' && rec.audId != null) {
           const audObj = ShowtimeState.audById(rec.audId);
           if (audObj && audObj.seats != null) {
             seats = parseInt(audObj.seats, 10) || 0;
@@ -7979,13 +8288,13 @@ if (document.readyState === 'loading') {
         } else {
           let film = null;
           try {
-            if (ShowtimeState.filmById && rec.filmId) {
+            if (rec.filmId && typeof ShowtimeState.filmById === 'function') {
               film = ShowtimeState.filmById(rec.filmId);
             }
           } catch (_) {}
           if (film) {
-            const runtime = (film.runtime || 0) + (film.trailer || 0);
-            endTime = new Date(start.getTime() + runtime * 60000);
+            const total = (film.runtime || 0) + (film.trailer || 0) + (film.clean || 0);
+            endTime = new Date(start.getTime() + total * 60000);
           } else {
             endTime = new Date(start);
           }
@@ -7995,108 +8304,363 @@ if (document.readyState === 'loading') {
       endHourCounts.set(endHr, (endHourCounts.get(endHr) || 0) + 1);
     });
 
-    const filmItems = Array.from(filmCounts.entries()).sort((a, b) => b[1] - a[1]);
-    const filmMax = filmItems.reduce((m, [, v]) => Math.max(m, v), 0);
-    filmItems.forEach(([label, value]) => {
-      const tr = document.createElement('tr');
-      tr.appendChild(createCell(label, 'px-2 py-1 text-left'));
-      tr.appendChild(createCell(createBar(value, filmMax), 'px-2 py-1 text-right'));
-      if (filmBody) filmBody.appendChild(tr);
-    });
+    const filmEntries = Array.from(filmCounts.entries()).sort((a, b) => b[1] - a[1]);
+    const audEntries = Array.from(audCounts.entries()).sort((a, b) => b[1] - a[1]);
 
-    const audItems = Array.from(audCounts.entries()).sort((a, b) => b[1] - a[1]);
-    const audMax = audItems.reduce((m, [, v]) => Math.max(m, v), 0);
-    audItems.forEach(([label, value]) => {
-      const tr = document.createElement('tr');
-      tr.appendChild(createCell(label, 'px-2 py-1 text-left'));
-      tr.appendChild(createCell(createBar(value, audMax), 'px-2 py-1 text-right'));
-      if (audBody) audBody.appendChild(tr);
-    });
+    const filmLabels = filmEntries.map(([label]) => label);
+    const filmData = filmEntries.map(([, value]) => value);
+    const audLabels = audEntries.map(([label]) => label);
+    const audData = audEntries.map(([, value]) => value);
 
-    const timeItems = Array.from(hourCounts.keys())
-      .sort((a, b) => a - b)
-      .map(hr => ({
-        hour: hr,
-        starts: hourCounts.get(hr) || 0,
-        seats: seatCounts.get(hr) || 0,
-        ends: endHourCounts.get(hr) || 0,
-      }));
-    timeItems.forEach(item => {
-      const tr = document.createElement('tr');
-      tr.appendChild(createCell(formatHour(item.hour), 'px-2 py-1 text-left'));
-      tr.appendChild(createCell(item.starts, 'px-2 py-1 text-right font-medium'));
-      tr.appendChild(createCell(item.seats, 'px-2 py-1 text-right'));
-      tr.appendChild(createCell(item.ends, 'px-2 py-1 text-right'));
-      if (timeBody) timeBody.appendChild(tr);
-    });
-
-    const utilEntries = computeUtilisation(shows, audCounts);
-    const utilMax = utilEntries.reduce((m, item) => Math.max(m, item.percent), 0);
-    utilEntries.forEach(item => {
-      const tr = document.createElement('tr');
-      tr.appendChild(createCell(item.audName, 'px-2 py-1 text-left'));
-      tr.appendChild(createCell(createBar(item.percent.toFixed(1), utilMax || 100, '%'), 'px-2 py-1 text-right'));
-      if (utilBody) utilBody.appendChild(tr);
-    });
-
-    if (flaggedContainer) {
-      const issues = computeFlaggedIssues();
-      issues.forEach(issue => {
-        const li = document.createElement('li');
-        let colour = 'text-gray-700';
-        if (issue.type === 'late') colour = 'text-blue-700';
-        else if (issue.type === 'gap') colour = 'text-yellow-600';
-        else if (issue.type === 'huge') colour = 'text-red-700';
-        li.className = colour;
-        li.textContent = issue.message;
-        flaggedContainer.appendChild(li);
-      });
-      if (issues.length === 0) {
-        const li = document.createElement('li');
-        li.className = 'text-green-700';
-        li.textContent = 'No downtime or late-first issues detected.';
-        flaggedContainer.appendChild(li);
+    const utilLabels = [];
+    const utilData = [];
+    try {
+      const state = ShowtimeState.state || {};
+      let firstHM = state.firstShowHM || '07:00';
+      let lastHM = state.lastShowHM || '23:00';
+      const currentDate = typeof ShowtimeState.getCurrentDate === 'function'
+        ? ShowtimeState.getCurrentDate()
+        : null;
+      if (currentDate && state.scheduleByDate && state.scheduleByDate[currentDate]) {
+        const entry = state.scheduleByDate[currentDate];
+        if (entry) {
+          firstHM = entry.firstShowHM || firstHM;
+          lastHM = entry.lastShowHM || lastHM;
+        }
       }
+      const firstDate = typeof ShowtimeState.dtFromHM === 'function' ? ShowtimeState.dtFromHM(firstHM) : new Date();
+      const lastDate = typeof ShowtimeState.dtFromHM === 'function' ? ShowtimeState.dtFromHM(lastHM) : new Date();
+      let available = (lastDate - firstDate) / 60000;
+      if (!isFinite(available) || available <= 0) {
+        available += 24 * 60;
+      }
+
+      const utilIndex = new Map();
+      audEntries.forEach(([label], idx) => {
+        utilLabels.push(label);
+        utilData.push(0);
+        utilIndex.set(label, idx);
+      });
+
+      shows.forEach(rec => {
+        const audName = rec.audName || 'Unassigned';
+        const idx = utilIndex.has(audName) ? utilIndex.get(audName) : null;
+        if (idx == null) return;
+        const start = rec.start instanceof Date ? rec.start : new Date(rec.start);
+        const end = rec.end instanceof Date ? rec.end : new Date(rec.end);
+        let duration = (end - start) / 60000;
+        if (!isFinite(duration) || duration < 0) duration = 0;
+        utilData[idx] += duration;
+      });
+
+      utilData.forEach((mins, idx) => {
+        utilData[idx] = available > 0 ? Math.min(100, (mins / available) * 100) : 0;
+      });
+    } catch (_) {}
+
+    const hrLabels = [];
+    const hrData = [];
+    const seatData = [];
+    Array.from(hourCounts.keys()).sort((a, b) => a - b).forEach(hr => {
+      const hNum = parseInt(hr, 10);
+      hrLabels.push(formatHour(hNum));
+      hrData.push(hourCounts.get(hr) || 0);
+      seatData.push(seatCounts.get(hr) || 0);
+    });
+
+    const endHrLabels = [];
+    const endHrData = [];
+    Array.from(endHourCounts.keys()).sort((a, b) => a - b).forEach(hr => {
+      const hNum = parseInt(hr, 10);
+      endHrLabels.push(formatHour(hNum));
+      endHrData.push(endHourCounts.get(hr) || 0);
+    });
+
+    const rootStyle = typeof window !== 'undefined'
+      ? getComputedStyle(document.documentElement)
+      : null;
+    let primary = rootStyle ? rootStyle.getPropertyValue('--brand-from').trim() : '';
+    if (!primary) primary = '#3b82f6';
+    const colors = {
+      film: primary,
+      aud: lightenColor(primary, 20),
+      time: darkenColor(primary, 10)
+    };
+    const seatColor = lightenColor(primary, 40);
+    const endColor = darkenColor(primary, 30);
+    const utilColor = darkenColor(primary, 20);
+
+    const filmCtx = filmCanvas.getContext('2d');
+    if (filmChart) {
+      filmChart.data.labels = filmLabels;
+      filmChart.data.datasets[0].data = filmData;
+      filmChart.update();
+    } else {
+      filmChart = new Chart(filmCtx, {
+        type: 'bar',
+        data: {
+          labels: filmLabels,
+          datasets: [
+            {
+              label: 'Shows',
+              data: filmData,
+              backgroundColor: colors.film
+            }
+          ]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: false,
+          maintainAspectRatio: false
+        }
+      });
+    }
+
+    const audCtx = audCanvas.getContext('2d');
+    if (audChart) {
+      audChart.data.labels = audLabels;
+      audChart.data.datasets[0].data = audData;
+      audChart.update();
+    } else {
+      audChart = new Chart(audCtx, {
+        type: 'bar',
+        data: {
+          labels: audLabels,
+          datasets: [
+            {
+              label: 'Shows',
+              data: audData,
+              backgroundColor: colors.aud
+            }
+          ]
+        },
+        options: {
+          responsive: false,
+          maintainAspectRatio: false
+        }
+      });
+    }
+
+    const timeCtx = timeCanvas.getContext('2d');
+    if (timeChart) {
+      try { timeChart.destroy(); } catch (_) {}
+      timeChart = null;
+    }
+    timeChart = new Chart(timeCtx, {
+      type: 'line',
+      data: {
+        labels: hrLabels,
+        datasets: [
+          {
+            label: 'Shows',
+            data: hrData,
+            borderColor: colors.time,
+            backgroundColor: colors.time,
+            tension: 0.2,
+            fill: false,
+            pointRadius: 3,
+            pointHoverRadius: 4,
+            yAxisID: 'y'
+          },
+          {
+            label: 'Seats',
+            data: seatData,
+            borderColor: seatColor,
+            backgroundColor: seatColor,
+            tension: 0.2,
+            fill: false,
+            pointRadius: 3,
+            pointHoverRadius: 4,
+            yAxisID: 'y1'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+
+    const endCtx = endCanvas.getContext('2d');
+    if (endTimeChart) {
+      try { endTimeChart.destroy(); } catch (_) {}
+      endTimeChart = null;
+    }
+    endTimeChart = new Chart(endCtx, {
+      type: 'bar',
+      data: {
+        labels: endHrLabels,
+        datasets: [
+          {
+            label: 'Shows Ending',
+            data: endHrData,
+            backgroundColor: endColor
+          }
+        ]
+      },
+      options: {
+        responsive: false,
+        maintainAspectRatio: false
+      }
+    });
+
+    const utilCtx = utilCanvas.getContext('2d');
+    if (utilChart) {
+      utilChart.data.labels = utilLabels;
+      utilChart.data.datasets[0].data = utilData;
+      utilChart.update();
+    } else {
+      utilChart = new Chart(utilCtx, {
+        type: 'bar',
+        data: {
+          labels: utilLabels,
+          datasets: [
+            {
+              label: 'Utilisation %',
+              data: utilData,
+              backgroundColor: utilColor
+            }
+          ]
+        },
+        options: {
+          responsive: false,
+          maintainAspectRatio: false
+        }
+      });
+    }
+
+    try {
+      const flaggedContainer = document.getElementById('flaggedList');
+      if (flaggedContainer) {
+        flaggedContainer.innerHTML = '';
+        const issues = computeFlaggedIssues();
+        issues.forEach(issue => {
+          const li = document.createElement('li');
+          let colourClass = '';
+          if (issue.type === 'late') {
+            colourClass = 'text-blue-700';
+          } else if (issue.type === 'gap') {
+            colourClass = 'text-yellow-700';
+          } else if (issue.type === 'huge') {
+            colourClass = 'text-red-700';
+          }
+          const link = document.createElement('a');
+          link.href = '#';
+          link.textContent = issue.message;
+          link.className = `${colourClass} underline`;
+          link.title = 'View in schedule';
+          link.addEventListener('click', (evt) => {
+            evt.preventDefault();
+            const audName = issue.audName || '';
+            try {
+              window.location.hash = `jump=${encodeURIComponent(audName)}`;
+            } catch (_) {}
+            const navBtn = document.querySelector('[data-view-target="schedule-grid"]');
+            if (navBtn) navBtn.click();
+            setTimeout(() => {
+              try {
+                window.location.hash = `jump=${encodeURIComponent(audName)}`;
+                window.dispatchEvent(new Event('hashchange'));
+              } catch (_) {}
+            }, 0);
+          });
+          li.appendChild(link);
+          flaggedContainer.appendChild(li);
+        });
+        if (!issues.length) {
+          const li = document.createElement('li');
+          li.className = 'text-green-700';
+          li.textContent = 'No downtime or late-first issues detected.';
+          flaggedContainer.appendChild(li);
+        }
+      }
+    } catch (err) {
+      console.error(err);
     }
   }
 
-  function computeUtilisation(shows, audCounts) {
-    const results = [];
-    if (!ShowtimeState) return results;
-    const state = ShowtimeState.state || {};
-    let firstHM = state.firstShowHM || '07:00';
-    let lastHM = state.lastShowHM || '23:00';
-    const dateIso = typeof ShowtimeState.getCurrentDate === 'function' ? ShowtimeState.getCurrentDate() : null;
-    try {
-      if (dateIso && state.scheduleByDate && state.scheduleByDate[dateIso]) {
-        const entry = state.scheduleByDate[dateIso];
-        if (entry.firstShowHM) firstHM = entry.firstShowHM;
-        if (entry.lastShowHM) lastHM = entry.lastShowHM;
-      }
-    } catch (_) {}
-    let firstDate = typeof ShowtimeState.dtFromHM === 'function' ? ShowtimeState.dtFromHM(firstHM) : new Date();
-    let lastDate = typeof ShowtimeState.dtFromHM === 'function' ? ShowtimeState.dtFromHM(lastHM) : new Date();
-    let available = (lastDate - firstDate) / 60000;
-    if (!isFinite(available) || available <= 0) {
-      available += 24 * 60;
-    }
-    const totals = new Map();
+  function computeFlaggedIssues() {
+    const issues = [];
+    if (!ShowtimeState || typeof ShowtimeState.getAllShows !== 'function') return issues;
+    const shows = ShowtimeState.getAllShows() || [];
+    const byAud = {};
     shows.forEach(rec => {
-      const audName = rec.audName || 'Unassigned';
-      if (!audCounts.has(audName)) return;
-      const start = rec.start instanceof Date ? rec.start : new Date(rec.start);
-      const end = rec.end instanceof Date ? rec.end : new Date(rec.end || start);
-      let duration = (end - start) / 60000;
-      if (!isFinite(duration) || duration < 0) duration = 0;
-      totals.set(audName, (totals.get(audName) || 0) + duration);
+      const audId = rec.audId;
+      if (!audId) return;
+      if (!byAud[audId]) byAud[audId] = [];
+      let endDate = rec.end;
+      if (!(endDate instanceof Date)) {
+        if (rec.end && typeof rec.end === 'string') {
+          endDate = new Date(rec.end);
+        } else {
+          let film = null;
+          try {
+            if (rec.filmId && typeof ShowtimeState.filmById === 'function') {
+              film = ShowtimeState.filmById(rec.filmId);
+            }
+          } catch (_) {}
+          if (film) {
+            const total = (film.runtime || 0) + (film.trailer || 0) + (film.clean || 0);
+            const start = rec.start instanceof Date ? rec.start : new Date(rec.start);
+            endDate = new Date(start.getTime() + total * 60000);
+          } else {
+            endDate = rec.start instanceof Date ? rec.start : new Date(rec.start);
+          }
+        }
+      }
+      byAud[audId].push({
+        start: rec.start instanceof Date ? rec.start : new Date(rec.start),
+        end: endDate,
+        audName: rec.audName || ''
+      });
     });
-    audCounts.forEach((_, audName) => {
-      const mins = totals.get(audName) || 0;
-      const percent = available > 0 ? Math.min(100, (mins / available) * 100) : 0;
-      results.push({ audName, percent });
+
+    const state = ShowtimeState.state || {};
+    const firstHM = state.firstShowHM || '07:00';
+    const windowStartRaw = typeof ShowtimeState.dtFromHM === 'function'
+      ? ShowtimeState.dtFromHM(firstHM)
+      : new Date();
+
+    Object.keys(byAud).forEach(audId => {
+      const list = byAud[audId];
+      list.sort((a, b) => normalizeDateForGap(a.start) - normalizeDateForGap(b.start));
+      if (!list.length) return;
+      const audName = list[0].audName || `Aud ${audId}`;
+      const windowStart = normalizeDateForGap(windowStartRaw);
+      const firstStart = normalizeDateForGap(list[0].start);
+      const diffFirst = (firstStart - windowStart) / 60000;
+      if (diffFirst >= FIT_SLOT_MIN) {
+        const startDisp = typeof ShowtimeState.to12 === 'function' ? ShowtimeState.to12(windowStartRaw) : '';
+        const endDisp = typeof ShowtimeState.to12 === 'function' ? ShowtimeState.to12(list[0].start) : '';
+        const durationStr = formatDuration(diffFirst);
+        issues.push({
+          audName,
+          type: 'late',
+          message: `${audName}: slot before first show from ${startDisp} to ${endDisp} (${durationStr})`,
+          minutes: diffFirst
+        });
+      }
+      for (let i = 0; i < list.length - 1; i++) {
+        const currEnd = normalizeDateForGap(list[i].end);
+        const nextStart = normalizeDateForGap(list[i + 1].start);
+        const gapMin = (nextStart - currEnd) / 60000;
+        if (gapMin >= GAP_THRESHOLD_MIN) {
+          const startDisp = typeof ShowtimeState.to12 === 'function' ? ShowtimeState.to12(list[i].end) : '';
+          const endDisp = typeof ShowtimeState.to12 === 'function' ? ShowtimeState.to12(list[i + 1].start) : '';
+          const durationStr = formatDuration(gapMin);
+          const type = gapMin >= GAP_HUGE_MIN ? 'huge' : 'gap';
+          issues.push({
+            audName,
+            type,
+            message: `${audName}: gap from ${startDisp} to ${endDisp} (${durationStr})`,
+            minutes: gapMin
+          });
+        }
+      }
     });
-    results.sort((a, b) => b.percent - a.percent);
-    return results;
+
+    issues.sort((a, b) => b.minutes - a.minutes);
+    return issues;
   }
 
   function normalizeDateForGap(dt) {
@@ -8113,87 +8677,47 @@ if (document.readyState === 'loading') {
     return `${h}h${String(m).padStart(2, '0')}m`;
   }
 
-  function computeFlaggedIssues() {
-    const issues = [];
-    if (!ShowtimeState || typeof ShowtimeState.getAllShows !== 'function') return issues;
-    const shows = ShowtimeState.getAllShows() || [];
-    const byAud = {};
-    shows.forEach(rec => {
-      const audId = rec.audId;
-      if (!audId) return;
-      if (!byAud[audId]) byAud[audId] = [];
-      let endDate = rec.end;
-      if (!(endDate instanceof Date)) {
-        if (rec.end) {
-          endDate = new Date(rec.end);
-        } else {
-          let film = null;
-          try {
-            if (rec.filmId && ShowtimeState.filmById) {
-              film = ShowtimeState.filmById(rec.filmId);
-            }
-          } catch (_) {}
-          if (film) {
-            const total = (film.runtime || 0) + (film.trailer || 0) + (film.clean || 0);
-            endDate = new Date((rec.start instanceof Date ? rec.start : new Date(rec.start)).getTime() + total * 60000);
-          } else {
-            endDate = new Date(rec.start instanceof Date ? rec.start : new Date(rec.start));
-          }
-        }
-      }
-      byAud[audId].push({
-        start: rec.start instanceof Date ? rec.start : new Date(rec.start),
-        end: endDate,
-        audName: rec.audName || ''
-      });
-    });
-    const state = ShowtimeState.state || {};
-    const firstHM = state.firstShowHM || '07:00';
-    const windowStartRaw = typeof ShowtimeState.dtFromHM === 'function' ? ShowtimeState.dtFromHM(firstHM) : new Date();
-    Object.keys(byAud).forEach(audId => {
-      const list = byAud[audId];
-      list.sort((a, b) => normalizeDateForGap(a.start) - normalizeDateForGap(b.start));
-      if (!list.length) return;
-      const audName = list[0].audName || `Aud ${audId}`;
-      const windowStart = normalizeDateForGap(windowStartRaw);
-      const firstStart = normalizeDateForGap(list[0].start);
-      const diffFirst = (firstStart - windowStart) / 60000;
-      if (diffFirst >= 105) {
-        const startDisp = ShowtimeState.to12 ? ShowtimeState.to12(windowStartRaw) : '';
-        const endDisp = ShowtimeState.to12 ? ShowtimeState.to12(list[0].start) : '';
-        const durationStr = formatDuration(diffFirst);
-        issues.push({
-          audName,
-          type: 'late',
-          message: `${audName}: slot before first show from ${startDisp} to ${endDisp} (${durationStr})`,
-          minutes: diffFirst
-        });
-      }
-      for (let i = 0; i < list.length - 1; i++) {
-        const currEnd = normalizeDateForGap(list[i].end);
-        const nextStart = normalizeDateForGap(list[i + 1].start);
-        const gapMin = (nextStart - currEnd) / 60000;
-        if (gapMin >= 45) {
-          const startDisp = ShowtimeState.to12 ? ShowtimeState.to12(list[i].end) : '';
-          const endDisp = ShowtimeState.to12 ? ShowtimeState.to12(list[i + 1].start) : '';
-          const durationStr = formatDuration(gapMin);
-          const type = gapMin >= 90 ? 'huge' : 'gap';
-          issues.push({
-            audName,
-            type,
-            message: `${audName}: gap from ${startDisp} to ${endDisp} (${durationStr})`,
-            minutes: gapMin
-          });
-        }
-      }
-    });
-    issues.sort((a, b) => b.minutes - a.minutes);
-    return issues;
-  }
-
   function formatHour(h) {
     const hour12 = ((h + 11) % 12) + 1;
     return hour12 + (h < 12 ? 'a' : 'p');
+  }
+
+  function lightenColor(hex, percent) {
+    const c = parseHex(hex);
+    if (!c) return hex;
+    const [r, g, b] = c;
+    const newR = Math.min(255, Math.round(r + (255 - r) * percent / 100));
+    const newG = Math.min(255, Math.round(g + (255 - g) * percent / 100));
+    const newB = Math.min(255, Math.round(b + (255 - b) * percent / 100));
+    return rgbToHex(newR, newG, newB);
+  }
+
+  function darkenColor(hex, percent) {
+    const c = parseHex(hex);
+    if (!c) return hex;
+    const [r, g, b] = c;
+    const newR = Math.max(0, Math.round(r - r * percent / 100));
+    const newG = Math.max(0, Math.round(g - g * percent / 100));
+    const newB = Math.max(0, Math.round(b - b * percent / 100));
+    return rgbToHex(newR, newG, newB);
+  }
+
+  function parseHex(hex) {
+    if (!hex) return null;
+    let h = hex.replace('#', '').trim();
+    if (h.length === 3) {
+      h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    }
+    if (h.length !== 6) return null;
+    const r = parseInt(h.slice(0, 2), 16);
+    const g = parseInt(h.slice(2, 4), 16);
+    const b = parseInt(h.slice(4, 6), 16);
+    if ([r, g, b].some(n => Number.isNaN(n))) return null;
+    return [r, g, b];
+  }
+
+  function rgbToHex(r, g, b) {
+    return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
   }
 
   if (document.readyState === 'loading') {
@@ -8202,7 +8726,6 @@ if (document.readyState === 'loading') {
     initDashboardPage();
   }
 })();
-
 
 // audit.js
 // Audit tab script
