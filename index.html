@@ -30,6 +30,19 @@
       font-size: 0.875rem;
       font-weight: 500;
       display: inline-block;
+      background: transparent;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .nav-link:focus-visible {
+      outline: 2px solid rgba(255, 255, 255, 0.7);
+      outline-offset: 2px;
+    }
+
+    .nav-link.active-nav {
+      background-color: rgba(255, 255, 255, 0.2);
     }
   </style>
 </head>
@@ -37,17 +50,17 @@
   <nav class="nav-wrap grad-nav px-4 py-3">
     <!-- First row: navigation links.  These anchors remain on a single line. -->
     <div class="nav-links flex flex-nowrap items-center gap-2">
-      <a href="index.html" class="nav-link hover:bg-blue-700">Home</a>
-      <a href="aud.html" class="nav-link hover:bg-blue-700">Auditoriums</a>
-      <a href="bookings.html" class="nav-link hover:bg-blue-700">Bookings</a>
-      <a href="prime.html" class="nav-link hover:bg-blue-700">Prime</a>
+      <button type="button" class="nav-link hover:bg-blue-700" data-view-target="home">Home</button>
+      <button type="button" class="nav-link hover:bg-blue-700" data-view-target="auditoriums" data-fallback-href="aud.html">Auditoriums</button>
+      <button type="button" class="nav-link hover:bg-blue-700" data-view-target="bookings" data-fallback-href="bookings.html">Bookings</button>
+      <button type="button" class="nav-link hover:bg-blue-700" data-view-target="prime" data-fallback-href="prime.html">Prime</button>
       <!-- Rename the grid tab to Schedule and add a Gantt tab -->
-      <a href="schedule-grid.html" class="nav-link hover:bg-blue-700">Schedule</a>
-      <a href="gantt.html" class="nav-link hover:bg-blue-700">Gantt</a>
+      <button type="button" class="nav-link hover:bg-blue-700" data-view-target="schedule" data-fallback-href="schedule-grid.html">Schedule</button>
+      <button type="button" class="nav-link hover:bg-blue-700" data-view-target="gantt" data-fallback-href="gantt.html">Gantt</button>
       <!-- Dashboard tab: show charts summarising schedules -->
-      <a href="dashboard.html" class="nav-link hover:bg-blue-700">Dashboard</a>
+      <button type="button" class="nav-link hover:bg-blue-700" data-view-target="dashboard" data-fallback-href="dashboard.html">Dashboard</button>
       <!-- Removed separate Data tab; its functionality is now part of the Home page -->
-      <a href="audit.html" class="nav-link hover:bg-blue-700">Audit</a>
+      <button type="button" class="nav-link hover:bg-blue-700" data-view-target="audit" data-fallback-href="audit.html">Audit</button>
     </div>
     <!-- Second row: controls.  Include a placeholder to reserve space for the
          film highlight dropdown even though the home page hides it.  Wrap
@@ -86,81 +99,131 @@
     <button class="swatch" data-brand-from="#8b5cf6" data-brand-to="#7c3aed" style="background-image: linear-gradient(to right,#8b5cf6,#7c3aed);"></button>
     <button class="swatch" data-brand-from="#6d28d9" data-brand-to="#4c1d95" style="background-image: linear-gradient(to right,#6d28d9,#4c1d95);"></button>
   </div>
-  <div class="p-6 max-w-5xl mx-auto">
-    <h1 class="text-2xl font-bold mb-4">Welcome to Showtime Builder</h1>
-    <p class="mb-4">Select a tab above to manage auditoriums, bookings, build prime schedules or view the schedule grid.</p>
-    <ul class="list-disc pl-6">
-      <li><strong>Auditoriums</strong>: Manage the list of theaters.</li>
-      <li><strong>Bookings</strong>: Assign films to slots for the current week.</li>
-      <li><strong>Prime</strong>: Choose prime times and build cycles for each booking.</li>
-      <li><strong>Schedule</strong>: Interactive grid to adjust individual show times, add manual shows and view the schedule.</li>
-      <li><strong>Order</strong>: View all shows sorted by start time and nudge their start earlier or later in 5‑minute increments.</li>
-      <li><strong>Gantt</strong>: Visual timeline by auditorium to view and drag shows horizontally to adjust start times or vertically to change auditoriums.</li>
-      <li><strong>Audit</strong>: View static reports such as the schedule by film title with gaps between shows.</li>
-    </ul>
+  <main id="viewHost" class="p-6 max-w-5xl mx-auto" data-current-view="home">
+    <section data-view="home">
+      <h1 class="text-2xl font-bold mb-4">Welcome to Showtime Builder</h1>
+      <p class="mb-4">Select a tab above to manage auditoriums, bookings, build prime schedules or view the schedule grid.</p>
+      <ul class="list-disc pl-6">
+        <li><strong>Auditoriums</strong>: Manage the list of theaters.</li>
+        <li><strong>Bookings</strong>: Assign films to slots for the current week.</li>
+        <li><strong>Prime</strong>: Choose prime times and build cycles for each booking.</li>
+        <li><strong>Schedule</strong>: Interactive grid to adjust individual show times, add manual shows and view the schedule.</li>
+        <li><strong>Order</strong>: View all shows sorted by start time and nudge their start earlier or later in 5‑minute increments.</li>
+        <li><strong>Gantt</strong>: Visual timeline by auditorium to view and drag shows horizontally to adjust start times or vertically to change auditoriums.</li>
+        <li><strong>Audit</strong>: View static reports such as the schedule by film title with gaps between shows.</li>
+      </ul>
 
-    <!-- Site information entry: allows the user to specify the cinema site name and number.
-         These values are saved in the application state and included in JSON exports.
-         When importing a JSON file that contains site information, the fields are pre‑filled. -->
-    <div class="mt-8">
-      <h2 class="text-xl font-semibold mb-4">Site Information</h2>
-      <div class="flex flex-wrap gap-4">
-        <label class="flex items-center space-x-2">
-          <span class="font-medium">Site Name:</span>
-          <input id="siteNameInput" type="text" class="border border-gray-300 rounded px-2 py-1 text-sm" placeholder="Enter site name" />
-        </label>
-        <label class="flex items-center space-x-2">
-          <span class="font-medium">Site Number:</span>
-          <input id="siteNumberInput" type="text" class="border border-gray-300 rounded px-2 py-1 text-sm" placeholder="Enter site number" />
-        </label>
+      <!-- Site information entry: allows the user to specify the cinema site name and number.
+           These values are saved in the application state and included in JSON exports.
+           When importing a JSON file that contains site information, the fields are pre‑filled. -->
+      <div class="mt-8">
+        <h2 class="text-xl font-semibold mb-4">Site Information</h2>
+        <div class="flex flex-wrap gap-4">
+          <label class="flex items-center space-x-2">
+            <span class="font-medium">Site Name:</span>
+            <input id="siteNameInput" type="text" class="border border-gray-300 rounded px-2 py-1 text-sm" placeholder="Enter site name" />
+          </label>
+          <label class="flex items-center space-x-2">
+            <span class="font-medium">Site Number:</span>
+            <input id="siteNumberInput" type="text" class="border border-gray-300 rounded px-2 py-1 text-sm" placeholder="Enter site number" />
+          </label>
+        </div>
       </div>
-    </div>
 
-    <!-- Data Export/Import controls formerly on the Data tab.  Placing them here
-         consolidates functionality on the Home page without adding another tab.
-         Users can export their current schedule, import a saved schedule or
-         generate a shows CSV. -->
-    <div class="mt-8">
-      <h2 class="text-xl font-semibold mb-4">Data Export / Import</h2>
-      <p class="mb-4">Export your current schedule to a JSON or CSV file, or import a previously saved JSON file to restore your schedule.</p>
-      <div class="space-y-4">
-        <!-- Standardised button sizing; buttons match those used throughout the app -->
-        <button id="exportJsonBtn" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Export JSON</button>
-        <!-- Add a CSV export button to download a list of all shows across all dates. -->
-        <button id="exportCsvBtn" class="px-3 py-1 bg-green-700 text-white rounded-lg hover:bg-green-800 text-sm">Export CSV</button>
-        <!-- Import JSON file input -->
-        <div class="flex flex-col gap-2">
-          <div>
-            <label class="mr-2 font-medium" for="importFileInput">Import JSON (file):</label>
-            <input id="importFileInput" type="file" accept=".json" class="border border-gray-300 rounded-lg p-1" />
+      <!-- Data Export/Import controls formerly on the Data tab.  Placing them here
+           consolidates functionality on the Home page without adding another tab.
+           Users can export their current schedule, import a saved schedule or
+           generate a shows CSV. -->
+      <div class="mt-8">
+        <h2 class="text-xl font-semibold mb-4">Data Export / Import</h2>
+        <p class="mb-4">Export your current schedule to a JSON or CSV file, or import a previously saved JSON file to restore your schedule.</p>
+        <div class="space-y-4">
+          <!-- Standardised button sizing; buttons match those used throughout the app -->
+          <button id="exportJsonBtn" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Export JSON</button>
+          <!-- Add a CSV export button to download a list of all shows across all dates. -->
+          <button id="exportCsvBtn" class="px-3 py-1 bg-green-700 text-white rounded-lg hover:bg-green-800 text-sm">Export CSV</button>
+          <!-- Import JSON file input -->
+          <div class="flex flex-col gap-2">
+            <div>
+              <label class="mr-2 font-medium" for="importFileInput">Import JSON (file):</label>
+              <input id="importFileInput" type="file" accept=".json" class="border border-gray-300 rounded-lg p-1" />
+            </div>
+          </div>
+          <!-- Add buttons to clear schedules and bookings across all dates. Place them side by side. -->
+          <div class="mt-4 flex flex-wrap gap-2">
+            <button id="clearAllSchedulesBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear All Schedules</button>
+            <button id="clearBookingsTimesBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear Bookings and Times</button>
           </div>
         </div>
-    <!-- Add buttons to clear schedules and bookings across all dates. Place them side by side. -->
-    <div class="mt-4 flex flex-wrap gap-2">
-      <button id="clearAllSchedulesBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear All Schedules</button>
-      <button id="clearBookingsTimesBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear Bookings and Times</button>
-    </div>
-      </div>
 
-      <!-- Removed theme colour examples section as per user request.  The colour swatch selector remains in the navigation bar above. -->
-    </div>
-    <!-- Bulk Bookings Input: allow users to paste film title, format, runtime and slot
-         separated by commas or tabs.  Format is optional; when omitted, leave it
-         blank.  Runtime and slot must be provided.  Trailer and cleanup times
-         default to 20 minutes.  Each line in the textarea corresponds to one
-         booking.  After clicking the Add button, bookings will be added to
-         the Bookings tab.  Existing blank rows will be reused before
-         appending new rows. -->
-    <div class="mt-8">
-      <h2 class="text-xl font-semibold mb-2">Bulk Bookings Input</h2>
-      <p class="text-sm mb-2 text-gray-600">Paste each booking on a new line in the format:<br>
-        <code>Title, Format (optional), Runtime (minutes), Slot</code><br>
-        For example: <code>The Big Show,IMAX,120,4</code> or <code>The Big Show,120,4</code>.<br>
-        Trailers and clean times will default to 20 minutes.</p>
-      <textarea id="bulkBookingsInput" rows="5" class="w-full border border-gray-300 rounded-lg p-2" placeholder="Paste bookings here..."></textarea>
-      <button id="addBulkBookingsBtn" class="mt-2 px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Add to Bookings</button>
-    </div>
-  </div>
+        <!-- Removed theme colour examples section as per user request.  The colour swatch selector remains in the navigation bar above. -->
+      </div>
+      <!-- Bulk Bookings Input: allow users to paste film title, format, runtime and slot
+           separated by commas or tabs.  Format is optional; when omitted, leave it
+           blank.  Runtime and slot must be provided.  Trailer and cleanup times
+           default to 20 minutes.  Each line in the textarea corresponds to one
+           booking.  After clicking the Add button, bookings will be added to
+           the Bookings tab.  Existing blank rows will be reused before
+           appending new rows. -->
+      <div class="mt-8">
+        <h2 class="text-xl font-semibold mb-2">Bulk Bookings Input</h2>
+        <p class="text-sm mb-2 text-gray-600">Paste each booking on a new line in the format:<br>
+          <code>Title, Format (optional), Runtime (minutes), Slot</code><br>
+          For example: <code>The Big Show,IMAX,120,4</code> or <code>The Big Show,120,4</code>.<br>
+          Trailers and clean times will default to 20 minutes.</p>
+        <textarea id="bulkBookingsInput" rows="5" class="w-full border border-gray-300 rounded-lg p-2" placeholder="Paste bookings here..."></textarea>
+        <button id="addBulkBookingsBtn" class="mt-2 px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Add to Bookings</button>
+      </div>
+    </section>
+  </main>
+  <script>
+    (function() {
+      document.addEventListener('DOMContentLoaded', () => {
+        const host = document.getElementById('viewHost');
+        const sections = host ? Array.from(host.querySelectorAll('[data-view]')) : [];
+        const navButtons = Array.from(document.querySelectorAll('[data-view-target]'));
+        const knownViews = new Set(sections.map(section => section.dataset.view));
+
+        function activate(view) {
+          if (!host || !view) return false;
+          let matched = false;
+          sections.forEach(section => {
+            const isMatch = section.dataset.view === view;
+            section.hidden = !isMatch;
+            if (isMatch) {
+              matched = true;
+            }
+          });
+          if (matched) {
+            host.dataset.currentView = view;
+            navButtons.forEach(btn => {
+              btn.classList.toggle('active-nav', btn.dataset.viewTarget === view);
+            });
+          }
+          return matched;
+        }
+
+        navButtons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const view = btn.dataset.viewTarget;
+            if (knownViews.has(view)) {
+              activate(view);
+            } else {
+              const fallback = btn.dataset.fallbackHref;
+              if (fallback) {
+                window.location.href = fallback;
+              }
+            }
+          });
+        });
+
+        const initialView = (host && host.dataset.currentView) || (sections[0] && sections[0].dataset.view);
+        if (initialView) {
+          activate(initialView);
+        }
+      });
+    })();
+  </script>
   <!-- Theme picker script: applies selected colours and persists choice -->
   <script src="theme.js"></script>
   <!-- Dense tables toggle: inserts a checkbox into the navigation controls for compact tables -->
