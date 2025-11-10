@@ -126,6 +126,8 @@
           <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Gantt timeline view inlined</span></li>
           <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Dashboard analytics view inlined</span></li>
           <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Audit reports view inlined</span></li>
+          <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Restore per-view control bars inside unified layout</span></li>
+          <li class="flex items-center gap-2"><input type="checkbox" disabled class="accent-blue-600" /><span>Merge external scripts &amp; styles into single-file bundle</span></li>
         </ul>
       </div>
 
@@ -412,7 +414,31 @@
     </section>
 
     <section data-view="gantt" hidden>
-      <div class="px-6 pt-4 pb-6">
+      <div class="px-6 pt-4 pb-2">
+        <div class="flex flex-wrap items-center gap-3 bg-white/60 rounded-xl px-4 py-3 shadow">
+          <label class="flex items-center gap-2 text-sm">
+            <span class="font-medium">First</span>
+            <select id="firstShowGanttSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+          </label>
+          <label class="flex items-center gap-2 text-sm">
+            <span class="font-medium">Last</span>
+            <select id="lastShowGanttSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+          </label>
+          <label class="flex items-center gap-2 text-sm">
+            <span class="font-medium">Date</span>
+            <div class="flex items-center">
+              <button id="prevDateGanttBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-l bg-white text-gray-800" title="Previous day">&larr;</button>
+              <input type="text" id="scheduleDateGantt" placeholder="MM/DD/YYYY" class="border-t border-b border-gray-300 px-2 py-1 text-sm text-gray-800" />
+              <button id="nextDateGanttBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-r bg-white text-gray-800" title="Next day">&rarr;</button>
+            </div>
+          </label>
+          <div class="flex items-center gap-2 ml-auto">
+            <button id="clearTimesGanttBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear Times</button>
+            <button id="copyScheduleGanttBtn" onclick="openCopyPanel(this, 'scheduleDateGantt')" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Copy</button>
+          </div>
+        </div>
+      </div>
+      <div class="px-6 pb-6">
         <div id="filmTray" class="sticky top-0 z-20 bg-white/90 backdrop-blur border-b p-2 flex flex-wrap gap-2"></div>
         <h2 class="text-xl font-semibold mb-3">Gantt Timeline</h2>
         <div class="overflow-x-auto">
@@ -456,7 +482,31 @@
     </section>
 
     <section data-view="audit" hidden>
-      <div class="px-6 pt-4 pb-6">
+      <div class="px-6 pt-4 pb-2">
+        <div class="flex flex-wrap items-center gap-3 bg-white/60 rounded-xl px-4 py-3 shadow">
+          <label class="flex items-center gap-2 text-sm">
+            <span class="font-medium">First</span>
+            <select id="firstShowAuditSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+          </label>
+          <label class="flex items-center gap-2 text-sm">
+            <span class="font-medium">Last</span>
+            <select id="lastShowAuditSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+          </label>
+          <label class="flex items-center gap-2 text-sm">
+            <span class="font-medium">Date</span>
+            <div class="flex items-center">
+              <button id="prevDateAuditBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-l bg-white text-gray-800" title="Previous day">&larr;</button>
+              <input type="text" id="scheduleDateAudit" placeholder="MM/DD/YYYY" class="border-t border-b border-gray-300 px-2 py-1 text-sm text-gray-800" />
+              <button id="nextDateAuditBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-r bg-white text-gray-800" title="Next day">&rarr;</button>
+            </div>
+          </label>
+          <div class="flex items-center gap-2 ml-auto">
+            <button id="clearTimesAuditBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear Times</button>
+            <button id="copyScheduleAuditBtn" onclick="openCopyPanel(this, 'scheduleDateAudit')" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Copy</button>
+          </div>
+        </div>
+      </div>
+      <div class="px-6 pb-6">
         <h2 class="text-xl font-semibold mb-4">Audit</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           <div>
