@@ -625,7 +625,7 @@
    * rendered.  Updating is triggered whenever the date or show window
    * selectors change.
    */
-  document.addEventListener('DOMContentLoaded', () => {
+  function initDashboardBar() {
     const nav = document.querySelector('nav');
     if (!nav) return;
     const controlsContainer = nav.querySelector('.nav-controls') || nav;
@@ -897,5 +897,11 @@
     window.addEventListener('filmHighlightChange', () => {
       if (!bar.classList.contains('hidden')) updateCharts();
     });
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDashboardBar);
+  } else {
+    initDashboardBar();
+  }
 })();

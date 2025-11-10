@@ -9,7 +9,7 @@
 (() => {
   const ShowtimeState = window.ShowtimeState;
   if (!ShowtimeState) return;
-  document.addEventListener('DOMContentLoaded', () => {
+  function initOrderPanel() {
     // Track which show is currently selected in the order panel. When a row
     // is clicked, we store its id here and re-render to apply a purple
     // highlight. This parallels the original React implementation where
@@ -575,5 +575,11 @@
     if (initialOpen !== false) {
       setTimeout(() => applyPanelState(true), 0);
     }
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initOrderPanel);
+  } else {
+    initOrderPanel();
+  }
 })();

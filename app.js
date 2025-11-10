@@ -1337,7 +1337,15 @@
    * selected film.  The highlight uses a semi‑dark pinkish colour
    * defined in theme.css via the .film-highlight class.
    */
-  document.addEventListener('DOMContentLoaded', () => {
+  function onReady(fn) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fn);
+    } else {
+      fn();
+    }
+  }
+
+  onReady(() => {
     try {
       const nav = document.querySelector('nav');
       if (!nav) return;
@@ -1662,7 +1670,7 @@
   // After the document has loaded, refresh the film highlight list using
   // the latest schedule data.  Use a slight delay to allow page‑specific
   // render functions to populate tables before computing the used films.
-  document.addEventListener('DOMContentLoaded', () => {
+  onReady(() => {
     setTimeout(() => {
       if (typeof window.refreshFilmHighlightOptions === 'function') {
         window.refreshFilmHighlightOptions();

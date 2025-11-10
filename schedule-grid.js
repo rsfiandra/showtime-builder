@@ -9,7 +9,7 @@ const ShowtimeState = window.ShowtimeState;
 // to the cell specified by this object.
 let gridNavNextFocus = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+function initScheduleGridPage() {
   // Initialise multi‑date support so that schedule data is stored per date.
   ShowtimeState.initDateSupport();
 
@@ -1505,4 +1505,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   if (prevGridBtn) prevGridBtn.addEventListener('click', () => shiftDateGrid(-1));
   if (nextGridBtn) nextGridBtn.addEventListener('click', () => shiftDateGrid(1));
-});
+  window.addEventListener('showtimeViewActivated', (evt) => {
+    const detail = evt && evt.detail;
+    const view = detail && detail.view ? detail.view : evt && evt.view;
+    if (view === 'schedule') {
+      renderAll();
+    }
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initScheduleGridPage);
+} else {
+  initScheduleGridPage();
+}

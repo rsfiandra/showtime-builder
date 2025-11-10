@@ -5,7 +5,7 @@
 // If the gap between two shows is less than 30 minutes, the cell is
 // highlighted for easy visualisation.
 
-document.addEventListener('DOMContentLoaded', () => {
+function initAuditPage() {
   const ShowtimeState = window.ShowtimeState;
   if (!ShowtimeState) return;
   // Initialise multi‑date support on the audit tab
@@ -445,4 +445,22 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (_) {}
     });
   }
-});
+  window.addEventListener('showtimeViewActivated', (evt) => {
+    const detail = evt && evt.detail;
+    const view = detail && detail.view ? detail.view : evt && evt.view;
+    if (view === 'audit') {
+      render();
+      try {
+        if (typeof window.applyFilmHighlight === 'function') {
+          window.applyFilmHighlight();
+        }
+      } catch (_) {}
+    }
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAuditPage);
+} else {
+  initAuditPage();
+}

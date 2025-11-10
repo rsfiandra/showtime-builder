@@ -29,7 +29,7 @@
       // localStorage may be unavailable in some contexts (e.g. private mode). Ignore errors.
     }
   }
-  document.addEventListener('DOMContentLoaded', function() {
+  function initThemePicker() {
     // Attempt to restore previously selected colours.
     try {
       const from = localStorage.getItem('showtime:brand-from');
@@ -50,5 +50,11 @@
         apply(from, to);
       });
     });
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initThemePicker);
+  } else {
+    initThemePicker();
+  }
 })();

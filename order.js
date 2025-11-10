@@ -2,7 +2,7 @@
 // Access the global ShowtimeState via window
 const ShowtimeState = window.ShowtimeState;
 
-document.addEventListener('DOMContentLoaded', () => {
+function initOrderView() {
   const tbody = document.getElementById('orderBody');
 
   function normalizeDate(dt) {
@@ -179,5 +179,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   window.addEventListener('storage', () => render());
+  window.addEventListener('showtimeViewActivated', (evt) => {
+    const detail = evt && evt.detail;
+    const view = detail && detail.view ? detail.view : evt && evt.view;
+    if (view === 'order') {
+      render();
+    }
+  });
   render();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initOrderView);
+} else {
+  initOrderView();
+}

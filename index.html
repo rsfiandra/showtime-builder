@@ -579,7 +579,7 @@
   </main>
   <script>
     (function() {
-      document.addEventListener('DOMContentLoaded', () => {
+      function initNavigationController() {
         const host = document.getElementById('viewHost');
         const sections = host ? Array.from(host.querySelectorAll('[data-view]')) : [];
         const navButtons = Array.from(document.querySelectorAll('[data-view-target]'));
@@ -600,6 +600,14 @@
             navButtons.forEach(btn => {
               btn.classList.toggle('active-nav', btn.dataset.viewTarget === view);
             });
+            try {
+              window.dispatchEvent(new CustomEvent('showtimeViewActivated', { detail: { view } }));
+            } catch (err) {
+              const evt = document.createEvent('Event');
+              evt.initEvent('showtimeViewActivated', true, true);
+              evt.view = view;
+              window.dispatchEvent(evt);
+            }
           }
           return matched;
         }
@@ -622,7 +630,13 @@
         if (initialView) {
           activate(initialView);
         }
-      });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initNavigationController);
+      } else {
+        initNavigationController();
+      }
     })();
   </script>
   <script src="aud.js?v=15"></script>
@@ -656,7 +670,7 @@
        runtime/slot parsing and reuses existing blank booking rows when
        available. -->
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    function initBulkBookingsInput() {
       const textarea = document.getElementById('bulkBookingsInput');
       const addBtn = document.getElementById('addBulkBookingsBtn');
       if (!textarea || !addBtn) return;
@@ -903,7 +917,7 @@
        localStorage.  This ensures that site details appear in JSON
        exports and reload automatically on subsequent visits. -->
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    function initSiteInfoControls() {
       // Ensure state is initialised
       try { ShowtimeState.load(); } catch (e) { /* ignore */ }
       const nameInput = document.getElementById('siteNameInput');
@@ -922,7 +936,15 @@
           ShowtimeState.save();
         });
       }
-    });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initBulkBookingsInput);
+      document.addEventListener('DOMContentLoaded', initSiteInfoControls);
+    } else {
+      initBulkBookingsInput();
+      initSiteInfoControls();
+    }
   </script>
 </body>
 </html>

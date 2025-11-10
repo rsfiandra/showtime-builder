@@ -7,7 +7,7 @@
 // previous/next day buttons to adjust the current date.
 (function() {
   const ShowtimeState = window.ShowtimeState;
-  document.addEventListener('DOMContentLoaded', () => {
+  function initHeaderControls() {
     if (!ShowtimeState) return;
     // Ensure per‑date scheduling is initialised
     try {
@@ -125,5 +125,11 @@
     }
     if (prevBtn) prevBtn.addEventListener('click', () => shiftDate(-1));
     if (nextBtn) nextBtn.addEventListener('click', () => shiftDate(1));
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHeaderControls);
+  } else {
+    initHeaderControls();
+  }
 })();

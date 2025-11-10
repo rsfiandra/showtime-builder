@@ -9,7 +9,7 @@
 // across pages and sessions.
 
 (function() {
-  document.addEventListener('DOMContentLoaded', () => {
+  function initDenseToggle() {
     // Locate the navigation controls container; default to the nav itself.
     const nav = document.querySelector('nav');
     if (!nav) return;
@@ -67,5 +67,11 @@
         localStorage.setItem('showtime:denseTables', checked ? '1' : '0');
       } catch (_) {}
     });
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDenseToggle);
+  } else {
+    initDenseToggle();
+  }
 })();
