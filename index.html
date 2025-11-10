@@ -123,9 +123,9 @@
           <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Prime schedule view inlined</span></li>
           <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Schedule grid view inlined</span></li>
           <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Start-time order view inlined</span></li>
-          <li class="flex items-center gap-2"><input type="checkbox" disabled class="accent-blue-600" /><span>Gantt timeline view inlined</span></li>
-          <li class="flex items-center gap-2"><input type="checkbox" disabled class="accent-blue-600" /><span>Dashboard analytics view inlined</span></li>
-          <li class="flex items-center gap-2"><input type="checkbox" disabled class="accent-blue-600" /><span>Audit reports view inlined</span></li>
+          <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Gantt timeline view inlined</span></li>
+          <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Dashboard analytics view inlined</span></li>
+          <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Audit reports view inlined</span></li>
         </ul>
       </div>
 
@@ -410,6 +410,122 @@
         <p class="text-sm text-gray-600 mt-3">Use the ▲/▼ buttons to nudge show start times earlier or later in 5‑minute increments. These changes persist across all views.</p>
       </div>
     </section>
+
+    <section data-view="gantt" hidden>
+      <div class="px-6 pt-4 pb-6">
+        <div id="filmTray" class="sticky top-0 z-20 bg-white/90 backdrop-blur border-b p-2 flex flex-wrap gap-2"></div>
+        <h2 class="text-xl font-semibold mb-3">Gantt Timeline</h2>
+        <div class="overflow-x-auto">
+          <div id="ganttContainer" class="relative rounded-xl overflow-hidden ring-1 ring-slate-200 shadow bg-white"></div>
+        </div>
+      </div>
+    </section>
+
+    <section data-view="dashboard" hidden>
+      <div class="p-6 space-y-8">
+        <h1 class="text-2xl font-bold">Dashboard</h1>
+        <p class="text-sm text-gray-600">Summary charts showing the distribution of showtimes by film, auditorium and start time for the selected date.</p>
+        <div class="grid md:grid-cols-2 gap-8">
+          <div class="bg-white shadow rounded-lg p-4">
+            <h2 class="text-lg font-semibold mb-2">Shows by Film</h2>
+            <canvas id="filmChart" height="250" style="max-height:250px;"></canvas>
+          </div>
+          <div class="bg-white shadow rounded-lg p-4">
+            <h2 class="text-lg font-semibold mb-2">Shows by Auditorium</h2>
+            <canvas id="audChart" height="250" style="max-height:250px;"></canvas>
+          </div>
+        </div>
+        <div class="grid md:grid-cols-1 gap-8 mt-8">
+          <div class="bg-white shadow rounded-lg p-4">
+            <h2 class="text-lg font-semibold mb-2">Start &amp; End Time Distribution (per hour)</h2>
+            <canvas id="timeChart" height="250" style="max-height:250px;"></canvas>
+            <canvas id="endTimeChart" height="250" style="max-height:250px; margin-top: 1rem;"></canvas>
+          </div>
+        </div>
+        <div class="grid md:grid-cols-1 gap-8 mt-8">
+          <div class="bg-white shadow rounded-lg p-4">
+            <h2 class="text-lg font-semibold mb-2">Auditorium Utilisation</h2>
+            <canvas id="utilChart" height="250" style="max-height:250px;"></canvas>
+          </div>
+        </div>
+        <div class="bg-white shadow rounded-lg p-4">
+          <h2 class="text-lg font-semibold mb-2">Flagged Issues</h2>
+          <ul id="flaggedList" class="list-disc pl-5 space-y-1 text-sm text-gray-700"></ul>
+        </div>
+      </div>
+    </section>
+
+    <section data-view="audit" hidden>
+      <div class="px-6 pt-4 pb-6">
+        <h2 class="text-xl font-semibold mb-4">Audit</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+          <div>
+            <h3 class="text-lg font-semibold mb-2">Schedule by Film</h3>
+            <div>
+              <table class="min-w-full table-fixed w-full rounded-xl overflow-hidden ring-1 ring-slate-200 shadow bg-white">
+                <thead class="grad-header text-xs">
+                  <tr>
+                    <th class="px-2 py-1 text-left">Film</th>
+                    <th class="px-2 py-1 text-left">Start</th>
+                    <th class="px-2 py-1 text-left">Auditorium</th>
+                    <th class="px-2 py-1 text-left">Gap</th>
+                  </tr>
+                </thead>
+                <tbody id="auditByFilmBody" class="divide-y divide-gray-200 odd:bg-white even:bg-gray-50 text-sm"></tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold mb-2">House Placement Audit</h3>
+            <div>
+              <table class="min-w-full table-fixed w-full rounded-xl overflow-hidden ring-1 ring-slate-200 shadow bg-white">
+                <thead class="grad-header text-xs">
+                  <tr>
+                    <th class="px-2 py-1 text-left">Film</th>
+                    <th class="px-2 py-1 text-left">Auditoriums</th>
+                  </tr>
+                </thead>
+                <tbody id="housePlacementBody" class="divide-y divide-gray-200 odd:bg-white even:bg-gray-50 text-sm"></tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold mb-2">Shows per Aud</h3>
+            <div>
+              <table class="min-w-full table-fixed w-full rounded-xl overflow-hidden ring-1 ring-slate-200 shadow bg-white">
+                <thead class="grad-header text-xs">
+                  <tr>
+                    <th class="px-2 py-1 text-left">Auditorium</th>
+                    <th class="px-2 py-1 text-left">Seats</th>
+                    <th class="px-2 py-1 text-left">Shows</th>
+                    <th class="px-2 py-1 text-left">First Show</th>
+                    <th class="px-2 py-1 text-left">Last Show</th>
+                  </tr>
+                </thead>
+                <tbody id="showsPerAudBody" class="divide-y divide-gray-200 odd:bg-white even:bg-gray-50 text-sm"></tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold mb-2">Shows per Feature</h3>
+            <div>
+              <table class="min-w-full table-fixed w-full rounded-xl overflow-hidden ring-1 ring-slate-200 shadow bg-white">
+                <thead class="grad-header text-xs">
+                  <tr>
+                    <th class="px-2 py-1 text-left">Film</th>
+                    <th class="px-2 py-1 text-left">Prints</th>
+                    <th class="px-2 py-1 text-left">Shows</th>
+                    <th class="px-2 py-1 text-left">First Show</th>
+                    <th class="px-2 py-1 text-left">Last Show</th>
+                  </tr>
+                </thead>
+                <tbody id="showsPerFeatureBody" class="divide-y divide-gray-200 odd:bg-white even:bg-gray-50 text-sm"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
   <script>
     (function() {
@@ -464,6 +580,10 @@
   <script src="prime.js?v=6"></script>
   <script src="schedule-grid.js?v=26"></script>
   <script src="order.js?v=3"></script>
+  <script src="gantt.js?v=7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="dashboard.js?v=5"></script>
+  <script src="audit.js?v=3"></script>
   <!-- Theme picker script: applies selected colours and persists choice -->
   <script src="theme.js"></script>
   <!-- Dense tables toggle: inserts a checkbox into the navigation controls for compact tables -->
