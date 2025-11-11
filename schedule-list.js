@@ -2,7 +2,7 @@
 // Access global ShowtimeState via window
 const ShowtimeState = window.ShowtimeState;
 
-document.addEventListener('DOMContentLoaded', () => {
+function initScheduleList() {
   // Initialise multi‑date support on load
   ShowtimeState.initDateSupport();
   const tbody = document.getElementById('scheduleBody');
@@ -156,4 +156,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   render();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initScheduleList);
+} else {
+  initScheduleList();
+}

@@ -14,7 +14,7 @@ let isTabbing = false;
 // events from triggering a re-render and stealing focus.
 let tabResetTimer = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+function initBookingsPage() {
   const addBtn = document.getElementById('addBookingBtn');
   // Button to clear all bookings and reset to a single blank row
   const clearBtn = document.getElementById('clearBookingsBtn');
@@ -861,4 +861,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     body.onkeydown = null;
   }
-});
+
+  window.addEventListener('showtimeViewActivated', (evt) => {
+    const detail = evt && evt.detail;
+    const view = detail && detail.view ? detail.view : evt && evt.view;
+    if (view === 'bookings') {
+      render();
+    }
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initBookingsPage);
+} else {
+  initBookingsPage();
+}

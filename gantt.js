@@ -978,8 +978,8 @@
     // Re-render to show the new show and update film tray
     render();
   });
-  // Initial render on DOM ready
-  document.addEventListener('DOMContentLoaded', () => {
+  // Initial render once the DOM is ready
+  function initGanttPage() {
     // Initialise multi‑date support. This will migrate existing schedules
     // and ensure the current date is set. It must be called before
     // rendering or modifying the schedule.
@@ -1102,5 +1102,18 @@
         }
       } catch (e) {}
     });
-  });
+    window.addEventListener('showtimeViewActivated', (evt) => {
+      const detail = evt && evt.detail;
+      const view = detail && detail.view ? detail.view : evt && evt.view;
+      if (view === 'gantt') {
+        setTimeout(() => render(), 0);
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGanttPage);
+  } else {
+    initGanttPage();
+  }
 })();

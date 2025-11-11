@@ -8,7 +8,7 @@ const ShowtimeState = window.ShowtimeState;
 // without calling render() so that focus is not lost mid-tab.
 let isTabbing = false;
 
-document.addEventListener('DOMContentLoaded', () => {
+function initAudPage() {
   const addBtn = document.getElementById('addAudBtn');
   // Reference the clear button if present
   const clearBtn = document.getElementById('clearAudBtn');
@@ -187,6 +187,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   window.addEventListener('storage', () => render());
+  window.addEventListener('showtimeViewActivated', (evt) => {
+    const detail = evt && evt.detail;
+    const view = detail && detail.view ? detail.view : evt && evt.view;
+    if (view === 'auditoriums') {
+      render();
+    }
+  });
   render();
 
   // Assign custom tab behaviour to inputs in the auditoriums table. This function
@@ -288,4 +295,10 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAudPage);
+} else {
+  initAudPage();
+}

@@ -7,7 +7,7 @@ const ShowtimeState = window.ShowtimeState;
 // will be closed. This emulates the behaviour of a native <select>.
 let openPrimeDropdownMenu = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+function initPrimePage() {
   // Initialise multi‑date support. This will migrate existing schedule
   // data into the current date entry and load the schedule for
   // state.currentDate. It must be called before rendering or
@@ -534,5 +534,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   window.addEventListener('storage', () => render());
+  window.addEventListener('showtimeViewActivated', (evt) => {
+    const detail = evt && evt.detail;
+    const view = detail && detail.view ? detail.view : evt && evt.view;
+    if (view === 'prime') {
+      render();
+    }
+  });
   render();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initPrimePage);
+} else {
+  initPrimePage();
+}

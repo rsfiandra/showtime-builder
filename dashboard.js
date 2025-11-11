@@ -130,7 +130,7 @@
     return issues;
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  function initDashboardPage() {
     if (!ShowtimeState) return;
     // Initialise multi-date support
     ShowtimeState.initDateSupport();
@@ -172,7 +172,20 @@
     // manually trigger `change` on the date input in header-controls.js.
     // Build initial charts
     updateCharts();
-  });
+    window.addEventListener('showtimeViewActivated', (evt) => {
+      const detail = evt && evt.detail;
+      const view = detail && detail.view ? detail.view : evt && evt.view;
+      if (view === 'dashboard') {
+        updateCharts();
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDashboardPage);
+  } else {
+    initDashboardPage();
+  }
 
   /**
    * Refresh chart data and update the dashboard charts. Reads all shows

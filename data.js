@@ -2,7 +2,7 @@
 // Provides buttons to export the entire state to JSON or a CSV of all shows,
 // and to import a previously exported JSON file to restore the schedule.
 
-document.addEventListener('DOMContentLoaded', () => {
+function initDataControls() {
   const ShowtimeState = window.ShowtimeState;
   // Ensure state is loaded before interacting
   try { ShowtimeState.load(); } catch (e) { /* ignore if not present */ }
@@ -220,4 +220,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initDataControls);
+} else {
+  initDataControls();
+}
+
