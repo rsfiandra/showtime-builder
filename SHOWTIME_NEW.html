@@ -1000,25 +1000,9 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
     <!-- Second row: controls.  Include a placeholder to reserve space for the
          film highlight dropdown even though the home page hides it.  Wrap
          controls onto their own line and take the full width of the nav. -->
-    <div class="nav-controls flex flex-wrap items-center gap-3 w-full mt-2">
-      <span id="filmHighlightPlaceholder"></span>
-      <label class="flex items-center space-x-1 text-white text-sm">
-        <span>First</span>
-        <select id="firstShowGlobalSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
-      </label>
-      <label class="flex items-center space-x-1 text-white text-sm">
-        <span>Last</span>
-        <select id="lastShowGlobalSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
-      </label>
-      <label class="flex items-center space-x-1 text-white text-sm">
-        <span>Date</span>
-        <div class="flex items-center">
-          <button id="prevDateGlobalBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-l bg-white text-gray-800" title="Previous day">&larr;</button>
-          <input type="text" id="scheduleDateGlobal" placeholder="MM/DD/YYYY" class="border-t border-b border-gray-300 px-2 py-1 text-sm text-gray-800" />
-          <button id="nextDateGlobalBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-r bg-white text-gray-800" title="Next day">&rarr;</button>
-        </div>
-      </label>
-      <button id="copyScheduleGlobalBtn" onclick="openCopyPanel(this, 'scheduleDateGlobal')" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Copy</button>
+    <div class="nav-controls flex flex-wrap items-center gap-3 w-full mt-2" id="navControlsRoot">
+      <span id="filmHighlightPlaceholder" class="flex items-center"></span>
+      <div id="navControlMount" class="flex flex-wrap items-center gap-3"></div>
     </div>
     <!-- Swatches removed from navigation bar; they will appear below the header -->
   </nav>
@@ -1034,97 +1018,204 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
     <button class="swatch" data-brand-from="#8b5cf6" data-brand-to="#7c3aed" style="background-image: linear-gradient(to right,#8b5cf6,#7c3aed);"></button>
     <button class="swatch" data-brand-from="#6d28d9" data-brand-to="#4c1d95" style="background-image: linear-gradient(to right,#6d28d9,#4c1d95);"></button>
   </div>
-  <main id="viewHost" class="p-6 max-w-5xl mx-auto" data-current-view="home">
+  <div id="viewControlTemplates" hidden>
+    <div data-view-controls="global" class="flex flex-wrap items-center gap-3 text-white text-sm">
+      <label class="flex items-center space-x-1">
+        <span>First</span>
+        <select id="firstShowGlobalSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <label class="flex items-center space-x-1">
+        <span>Last</span>
+        <select id="lastShowGlobalSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <label class="flex items-center space-x-1">
+        <span>Date</span>
+        <div class="flex items-center">
+          <button id="prevDateGlobalBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-l bg-white text-gray-800" title="Previous day">&larr;</button>
+          <input type="text" id="scheduleDateGlobal" placeholder="MM/DD/YYYY" class="border-t border-b border-gray-300 px-2 py-1 text-sm text-gray-800" />
+          <button id="nextDateGlobalBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-r bg-white text-gray-800" title="Next day">&rarr;</button>
+        </div>
+      </label>
+      <button id="copyScheduleGlobalBtn" onclick="openCopyPanel(this, 'scheduleDateGlobal')" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Copy</button>
+    </div>
+    <div data-view-controls="prime" class="flex flex-wrap items-center gap-3 text-white text-sm">
+      <label class="flex items-center space-x-1">
+        <span>First</span>
+        <select id="firstShowPrimeSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <label class="flex items-center space-x-1">
+        <span>Last</span>
+        <select id="lastShowPrimeSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <label class="flex items-center space-x-1">
+        <span>Date</span>
+        <div class="flex items-center">
+          <button id="prevDatePrimeBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-l bg-white text-gray-800" title="Previous day">&larr;</button>
+          <input type="text" id="scheduleDatePrime" placeholder="MM/DD/YYYY" class="border-t border-b border-gray-300 px-2 py-1 text-sm text-gray-800" />
+          <button id="nextDatePrimeBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-r bg-white text-gray-800" title="Next day">&rarr;</button>
+        </div>
+      </label>
+      <button id="clearTimesBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear Times</button>
+      <button id="copyScheduleBtn" onclick="openCopyPanel(this, 'scheduleDatePrime')" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Copy</button>
+    </div>
+    <div data-view-controls="schedule" class="flex flex-wrap items-center gap-3 text-white text-sm w-full">
+      <label class="flex items-center space-x-1">
+        <span>First</span>
+        <select id="firstShowSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <label class="flex items-center space-x-1">
+        <span>Last</span>
+        <select id="lastShowSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <label class="flex items-center space-x-1">
+        <span>Date</span>
+        <div class="flex items-center">
+          <button id="prevDateGridBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-l bg-white text-gray-800" title="Previous day">&larr;</button>
+          <input type="text" id="scheduleDateGrid" placeholder="MM/DD/YYYY" class="border-t border-b border-gray-300 px-2 py-1 text-sm text-gray-800" />
+          <button id="nextDateGridBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-r bg-white text-gray-800" title="Next day">&rarr;</button>
+        </div>
+      </label>
+      <button id="clearTimesGridBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear Times</button>
+      <button id="copyScheduleGridBtn" onclick="openCopyPanel(this, 'scheduleDateGrid')" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Copy</button>
+    </div>
+    <div data-view-controls="gantt" class="flex flex-wrap items-center gap-3 text-white text-sm">
+      <label class="flex items-center space-x-1">
+        <span>First</span>
+        <select id="firstShowGanttSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <label class="flex items-center space-x-1">
+        <span>Last</span>
+        <select id="lastShowGanttSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <label class="flex items-center space-x-1">
+        <span>Date</span>
+        <div class="flex items-center">
+          <button id="prevDateGanttBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-l bg-white text-gray-800" title="Previous day">&larr;</button>
+          <input type="text" id="scheduleDateGantt" placeholder="MM/DD/YYYY" class="border-t border-b border-gray-300 px-2 py-1 text-sm text-gray-800" />
+          <button id="nextDateGanttBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-r bg-white text-gray-800" title="Next day">&rarr;</button>
+        </div>
+      </label>
+      <button id="clearTimesGanttBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear Times</button>
+      <button id="copyScheduleGanttBtn" onclick="openCopyPanel(this, 'scheduleDateGantt')" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Copy</button>
+    </div>
+    <div data-view-controls="audit" class="flex flex-wrap items-center gap-3 text-white text-sm">
+      <label class="flex items-center space-x-1">
+        <span>First</span>
+        <select id="firstShowAuditSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <label class="flex items-center space-x-1">
+        <span>Last</span>
+        <select id="lastShowAuditSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
+      </label>
+      <label class="flex items-center space-x-1">
+        <span>Date</span>
+        <div class="flex items-center">
+          <button id="prevDateAuditBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-l bg-white text-gray-800" title="Previous day">&larr;</button>
+          <input type="text" id="scheduleDateAudit" placeholder="MM/DD/YYYY" class="border-t border-b border-gray-300 px-2 py-1 text-sm text-gray-800" />
+          <button id="nextDateAuditBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-r bg-white text-gray-800" title="Next day">&rarr;</button>
+        </div>
+      </label>
+      <button id="clearTimesAuditBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear Times</button>
+      <button id="copyScheduleAuditBtn" onclick="openCopyPanel(this, 'scheduleDateAudit')" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Copy</button>
+    </div>
+  </div>
+  <main id="viewHost" data-current-view="home">
     <section data-view="home">
-      <h1 class="text-2xl font-bold mb-4">Welcome to Showtime Builder</h1>
-      <p class="mb-4">Select a tab above to manage auditoriums, bookings, build prime schedules or view the schedule grid.</p>
-      <ul class="list-disc pl-6">
-        <li><strong>Auditoriums</strong>: Manage the list of theaters.</li>
-        <li><strong>Bookings</strong>: Assign films to slots for the current week.</li>
-        <li><strong>Prime</strong>: Choose prime times and build cycles for each booking.</li>
-        <li><strong>Schedule</strong>: Interactive grid to adjust individual show times, add manual shows and view the schedule.</li>
-        <li><strong>Order</strong>: View all shows sorted by start time and nudge their start earlier or later in 5‑minute increments.</li>
-        <li><strong>Gantt</strong>: Visual timeline by auditorium to view and drag shows horizontally to adjust start times or vertically to change auditoriums.</li>
-        <li><strong>Audit</strong>: View static reports such as the schedule by film title with gaps between shows.</li>
-      </ul>
+      <div class="p-6 max-w-5xl mx-auto">
+        <h1 class="text-2xl font-bold mb-4">Welcome to Showtime Builder</h1>
+        <p class="mb-4">Select a tab above to manage auditoriums, bookings, build prime schedules or view the schedule grid.</p>
+        <ul class="list-disc pl-6">
+          <li><strong>Auditoriums</strong>: Manage the list of theaters.</li>
+          <li><strong>Bookings</strong>: Assign films to slots for the current week.</li>
+          <li><strong>Prime</strong>: Choose prime times and build cycles for each booking.</li>
+          <li><strong>Schedule</strong>: Interactive grid to adjust individual show times, add manual shows and view the schedule.</li>
+          <li><strong>Order</strong>: View all shows sorted by start time and nudge their start earlier or later in 5‑minute increments.</li>
+          <li><strong>Gantt</strong>: Visual timeline by auditorium to view and drag shows horizontally to adjust start times or vertically to change auditoriums.</li>
+          <li><strong>Audit</strong>: View static reports such as the schedule by film title with gaps between shows.</li>
+        </ul>
 
-      <div class="mt-6 bg-white/70 border border-slate-200 rounded-xl shadow-sm p-4">
-        <h2 class="text-lg font-semibold mb-3">Single-file migration checklist</h2>
-        <ul class="space-y-2 text-sm text-gray-700">
-          <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Navigation shell &amp; home view</span></li>
-          <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Auditoriums view inlined</span></li>
-          <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Bookings view inlined</span></li>
-          <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Prime schedule view inlined</span></li>
-          <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Schedule grid view inlined</span></li>
-          <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Start-time order view inlined</span></li>
-          <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Gantt timeline view inlined</span></li>
+        <div class="mt-6 bg-white/70 border border-slate-200 rounded-xl shadow-sm p-4">
+          <h2 class="text-lg font-semibold mb-3">Single-file migration checklist</h2>
+          <ul class="space-y-2 text-sm text-gray-700">
+            <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Navigation shell &amp; home view</span></li>
+            <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Auditoriums view inlined</span></li>
+            <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Bookings view inlined</span></li>
+            <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Prime schedule view inlined</span></li>
+            <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Schedule grid view inlined</span></li>
+            <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Start-time order view inlined</span></li>
+            <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Gantt timeline view inlined</span></li>
           <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Dashboard analytics view inlined</span></li>
           <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Audit reports view inlined</span></li>
           <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Restore per-view control bars inside unified layout</span></li>
           <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Merge external scripts &amp; styles into single-file bundle</span></li>
+          <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Expand non-home layouts to full width inside unified shell</span></li>
+          <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Restore dynamic header controls per view</span></li>
+          <li class="flex items-center gap-2"><input type="checkbox" checked disabled class="accent-blue-600" /><span>Inline Chart.js-compatible renderer for dashboard visuals</span></li>
+          <li class="flex items-center gap-2"><input type="checkbox" class="accent-blue-600" /><span>Visual QA sweep &amp; polish</span></li>
         </ul>
       </div>
 
-      <!-- Site information entry: allows the user to specify the cinema site name and number.
-           These values are saved in the application state and included in JSON exports.
-           When importing a JSON file that contains site information, the fields are pre‑filled. -->
-      <div class="mt-8">
-        <h2 class="text-xl font-semibold mb-4">Site Information</h2>
-        <div class="flex flex-wrap gap-4">
-          <label class="flex items-center space-x-2">
-            <span class="font-medium">Site Name:</span>
-            <input id="siteNameInput" type="text" class="border border-gray-300 rounded px-2 py-1 text-sm" placeholder="Enter site name" />
-          </label>
-          <label class="flex items-center space-x-2">
-            <span class="font-medium">Site Number:</span>
-            <input id="siteNumberInput" type="text" class="border border-gray-300 rounded px-2 py-1 text-sm" placeholder="Enter site number" />
-          </label>
+        <!-- Site information entry: allows the user to specify the cinema site name and number.
+             These values are saved in the application state and included in JSON exports.
+             When importing a JSON file that contains site information, the fields are pre‑filled. -->
+        <div class="mt-8">
+          <h2 class="text-xl font-semibold mb-4">Site Information</h2>
+          <div class="flex flex-wrap gap-4">
+            <label class="flex items-center space-x-2">
+              <span class="font-medium">Site Name:</span>
+              <input id="siteNameInput" type="text" class="border border-gray-300 rounded px-2 py-1 text-sm" placeholder="Enter site name" />
+            </label>
+            <label class="flex items-center space-x-2">
+              <span class="font-medium">Site Number:</span>
+              <input id="siteNumberInput" type="text" class="border border-gray-300 rounded px-2 py-1 text-sm" placeholder="Enter site number" />
+            </label>
+          </div>
         </div>
-      </div>
 
-      <!-- Data Export/Import controls formerly on the Data tab.  Placing them here
-           consolidates functionality on the Home page without adding another tab.
-           Users can export their current schedule, import a saved schedule or
-           generate a shows CSV. -->
-      <div class="mt-8">
-        <h2 class="text-xl font-semibold mb-4">Data Export / Import</h2>
-        <p class="mb-4">Export your current schedule to a JSON or CSV file, or import a previously saved JSON file to restore your schedule.</p>
-        <div class="space-y-4">
-          <!-- Standardised button sizing; buttons match those used throughout the app -->
-          <button id="exportJsonBtn" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Export JSON</button>
-          <!-- Add a CSV export button to download a list of all shows across all dates. -->
-          <button id="exportCsvBtn" class="px-3 py-1 bg-green-700 text-white rounded-lg hover:bg-green-800 text-sm">Export CSV</button>
-          <!-- Import JSON file input -->
-          <div class="flex flex-col gap-2">
-            <div>
-              <label class="mr-2 font-medium" for="importFileInput">Import JSON (file):</label>
-              <input id="importFileInput" type="file" accept=".json" class="border border-gray-300 rounded-lg p-1" />
+        <!-- Data Export/Import controls formerly on the Data tab.  Placing them here
+             consolidates functionality on the Home page without adding another tab.
+             Users can export their current schedule, import a saved schedule or
+             generate a shows CSV. -->
+        <div class="mt-8">
+          <h2 class="text-xl font-semibold mb-4">Data Export / Import</h2>
+          <p class="mb-4">Export your current schedule to a JSON or CSV file, or import a previously saved JSON file to restore your schedule.</p>
+          <div class="space-y-4">
+            <!-- Standardised button sizing; buttons match those used throughout the app -->
+            <button id="exportJsonBtn" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Export JSON</button>
+            <!-- Add a CSV export button to download a list of all shows across all dates. -->
+            <button id="exportCsvBtn" class="px-3 py-1 bg-green-700 text-white rounded-lg hover:bg-green-800 text-sm">Export CSV</button>
+            <!-- Import JSON file input -->
+            <div class="flex flex-col gap-2">
+              <div>
+                <label class="mr-2 font-medium" for="importFileInput">Import JSON (file):</label>
+                <input id="importFileInput" type="file" accept=".json" class="border border-gray-300 rounded-lg p-1" />
+              </div>
+            </div>
+            <!-- Add buttons to clear schedules and bookings across all dates. Place them side by side. -->
+            <div class="mt-4 flex flex-wrap gap-2">
+              <button id="clearAllSchedulesBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear All Schedules</button>
+              <button id="clearBookingsTimesBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear Bookings and Times</button>
             </div>
           </div>
-          <!-- Add buttons to clear schedules and bookings across all dates. Place them side by side. -->
-          <div class="mt-4 flex flex-wrap gap-2">
-            <button id="clearAllSchedulesBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear All Schedules</button>
-            <button id="clearBookingsTimesBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear Bookings and Times</button>
-          </div>
-        </div>
 
-        <!-- Removed theme colour examples section as per user request.  The colour swatch selector remains in the navigation bar above. -->
-      </div>
-      <!-- Bulk Bookings Input: allow users to paste film title, format, runtime and slot
-           separated by commas or tabs.  Format is optional; when omitted, leave it
-           blank.  Runtime and slot must be provided.  Trailer and cleanup times
-           default to 20 minutes.  Each line in the textarea corresponds to one
-           booking.  After clicking the Add button, bookings will be added to
-           the Bookings tab.  Existing blank rows will be reused before
-           appending new rows. -->
-      <div class="mt-8">
-        <h2 class="text-xl font-semibold mb-2">Bulk Bookings Input</h2>
-        <p class="text-sm mb-2 text-gray-600">Paste each booking on a new line in the format:<br>
-          <code>Title, Format (optional), Runtime (minutes), Slot</code><br>
-          For example: <code>The Big Show,IMAX,120,4</code> or <code>The Big Show,120,4</code>.<br>
-          Trailers and clean times will default to 20 minutes.</p>
-        <textarea id="bulkBookingsInput" rows="5" class="w-full border border-gray-300 rounded-lg p-2" placeholder="Paste bookings here..."></textarea>
-        <button id="addBulkBookingsBtn" class="mt-2 px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Add to Bookings</button>
+          <!-- Removed theme colour examples section as per user request.  The colour swatch selector remains in the navigation bar above. -->
+        </div>
+        <!-- Bulk Bookings Input: allow users to paste film title, format, runtime and slot
+             separated by commas or tabs.  Format is optional; when omitted, leave it
+             blank.  Runtime and slot must be provided.  Trailer and cleanup times
+             default to 20 minutes.  Each line in the textarea corresponds to one
+             booking.  After clicking the Add button, bookings will be added to
+             the Bookings tab.  Existing blank rows will be reused before
+             appending new rows. -->
+        <div class="mt-8">
+          <h2 class="text-xl font-semibold mb-2">Bulk Bookings Input</h2>
+          <p class="text-sm mb-2 text-gray-600">Paste each booking on a new line in the format:<br>
+            <code>Title, Format (optional), Runtime (minutes), Slot</code><br>
+            For example: <code>The Big Show,IMAX,120,4</code> or <code>The Big Show,120,4</code>.<br>
+            Trailers and clean times will default to 20 minutes.</p>
+          <textarea id="bulkBookingsInput" rows="5" class="w-full border border-gray-300 rounded-lg p-2" placeholder="Paste bookings here..."></textarea>
+          <button id="addBulkBookingsBtn" class="mt-2 px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Add to Bookings</button>
+        </div>
       </div>
     </section>
 
@@ -1205,30 +1296,6 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
 
     <section data-view="prime" hidden>
       <div class="px-6 pt-4 pb-6 space-y-4">
-        <header class="flex flex-wrap items-center gap-3 bg-white/60 rounded-xl px-4 py-3 shadow">
-          <div class="flex items-center gap-2">
-            <label class="flex items-center gap-2 text-sm">
-              <span class="font-medium">First</span>
-              <select id="firstShowPrimeSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
-            </label>
-            <label class="flex items-center gap-2 text-sm">
-              <span class="font-medium">Last</span>
-              <select id="lastShowPrimeSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
-            </label>
-          </div>
-          <div class="flex items-center gap-2 text-sm">
-            <span class="font-medium">Date</span>
-            <div class="flex items-center">
-              <button id="prevDatePrimeBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-l bg-white text-gray-800" title="Previous day">&larr;</button>
-              <input type="text" id="scheduleDatePrime" placeholder="MM/DD/YYYY" class="border-t border-b border-gray-300 px-2 py-1 text-sm text-gray-800" />
-              <button id="nextDatePrimeBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-r bg-white text-gray-800" title="Next day">&rarr;</button>
-            </div>
-          </div>
-          <div class="flex items-center gap-2 ml-auto">
-            <button id="clearTimesBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear Times</button>
-            <button id="copyScheduleBtn" onclick="openCopyPanel(this, 'scheduleDatePrime')" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Copy</button>
-          </div>
-        </header>
         <div>
           <h2 class="text-xl font-semibold mb-4">Build Prime Schedule</h2>
           <div class="overflow-x-auto">
@@ -1285,30 +1352,6 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
 
     <section data-view="schedule" hidden>
       <div class="px-6 pt-4 pb-6 space-y-4">
-        <header class="flex flex-wrap items-center gap-3 bg-white/60 rounded-xl px-4 py-3 shadow">
-          <div class="flex items-center gap-2">
-            <label class="flex items-center gap-2 text-sm">
-              <span class="font-medium">First</span>
-              <select id="firstShowSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
-            </label>
-            <label class="flex items-center gap-2 text-sm">
-              <span class="font-medium">Last</span>
-              <select id="lastShowSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
-            </label>
-          </div>
-          <div class="flex items-center gap-2 text-sm">
-            <span class="font-medium">Date</span>
-            <div class="flex items-center">
-              <button id="prevDateGridBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-l bg-white text-gray-800" title="Previous day">&larr;</button>
-              <input type="text" id="scheduleDateGrid" placeholder="MM/DD/YYYY" class="border-t border-b border-gray-300 px-2 py-1 text-sm text-gray-800" />
-              <button id="nextDateGridBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-r bg-white text-gray-800" title="Next day">&rarr;</button>
-            </div>
-          </div>
-          <div class="flex items-center gap-2 ml-auto">
-            <button id="clearTimesGridBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear Times</button>
-            <button id="copyScheduleGridBtn" onclick="openCopyPanel(this, 'scheduleDateGrid')" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Copy</button>
-          </div>
-        </header>
         <div class="flex flex-wrap items-center gap-3">
           <button id="addRowBtn" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Add Row</button>
           <button id="toggleEndBtn" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Hide End Times</button>
@@ -1348,31 +1391,7 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
     </section>
 
     <section data-view="gantt" hidden>
-      <div class="px-6 pt-4 pb-2">
-        <div class="flex flex-wrap items-center gap-3 bg-white/60 rounded-xl px-4 py-3 shadow">
-          <label class="flex items-center gap-2 text-sm">
-            <span class="font-medium">First</span>
-            <select id="firstShowGanttSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
-          </label>
-          <label class="flex items-center gap-2 text-sm">
-            <span class="font-medium">Last</span>
-            <select id="lastShowGanttSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
-          </label>
-          <label class="flex items-center gap-2 text-sm">
-            <span class="font-medium">Date</span>
-            <div class="flex items-center">
-              <button id="prevDateGanttBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-l bg-white text-gray-800" title="Previous day">&larr;</button>
-              <input type="text" id="scheduleDateGantt" placeholder="MM/DD/YYYY" class="border-t border-b border-gray-300 px-2 py-1 text-sm text-gray-800" />
-              <button id="nextDateGanttBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-r bg-white text-gray-800" title="Next day">&rarr;</button>
-            </div>
-          </label>
-          <div class="flex items-center gap-2 ml-auto">
-            <button id="clearTimesGanttBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear Times</button>
-            <button id="copyScheduleGanttBtn" onclick="openCopyPanel(this, 'scheduleDateGantt')" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Copy</button>
-          </div>
-        </div>
-      </div>
-      <div class="px-6 pb-6">
+      <div class="px-6 pt-4 pb-6 space-y-4">
         <div id="filmTray" class="sticky top-0 z-20 bg-white/90 backdrop-blur border-b p-2 flex flex-wrap gap-2"></div>
         <h2 class="text-xl font-semibold mb-3">Gantt Timeline</h2>
         <div class="overflow-x-auto">
@@ -1416,31 +1435,7 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
     </section>
 
     <section data-view="audit" hidden>
-      <div class="px-6 pt-4 pb-2">
-        <div class="flex flex-wrap items-center gap-3 bg-white/60 rounded-xl px-4 py-3 shadow">
-          <label class="flex items-center gap-2 text-sm">
-            <span class="font-medium">First</span>
-            <select id="firstShowAuditSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
-          </label>
-          <label class="flex items-center gap-2 text-sm">
-            <span class="font-medium">Last</span>
-            <select id="lastShowAuditSelect" class="border border-gray-300 rounded px-2 py-1 text-sm text-gray-800"></select>
-          </label>
-          <label class="flex items-center gap-2 text-sm">
-            <span class="font-medium">Date</span>
-            <div class="flex items-center">
-              <button id="prevDateAuditBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-l bg-white text-gray-800" title="Previous day">&larr;</button>
-              <input type="text" id="scheduleDateAudit" placeholder="MM/DD/YYYY" class="border-t border-b border-gray-300 px-2 py-1 text-sm text-gray-800" />
-              <button id="nextDateAuditBtn" type="button" class="px-2 py-1 border border-gray-300 rounded-r bg-white text-gray-800" title="Next day">&rarr;</button>
-            </div>
-          </label>
-          <div class="flex items-center gap-2 ml-auto">
-            <button id="clearTimesAuditBtn" class="px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-800 text-sm">Clear Times</button>
-            <button id="copyScheduleAuditBtn" onclick="openCopyPanel(this, 'scheduleDateAudit')" class="px-3 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 text-sm">Copy</button>
-          </div>
-        </div>
-      </div>
-      <div class="px-6 pb-6">
+      <div class="px-6 pt-4 pb-6">
         <h2 class="text-xl font-semibold mb-4">Audit</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           <div>
@@ -1518,6 +1513,43 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
         const sections = host ? Array.from(host.querySelectorAll('[data-view]')) : [];
         const navButtons = Array.from(document.querySelectorAll('[data-view-target]'));
         const knownViews = new Set(sections.map(section => section.dataset.view));
+        const controlTemplates = document.getElementById('viewControlTemplates');
+        const controlMount = document.getElementById('navControlMount');
+        const controlMap = new Map();
+        if (controlTemplates) {
+          Array.from(controlTemplates.querySelectorAll('[data-view-controls]')).forEach(node => {
+            controlMap.set(node.dataset.viewControls, node);
+          });
+        }
+        const viewToControls = {
+          home: 'global',
+          auditoriums: 'global',
+          bookings: 'global',
+          order: 'global',
+          dashboard: 'global',
+          prime: 'prime',
+          schedule: 'schedule',
+          gantt: 'gantt',
+          audit: 'audit'
+        };
+
+        function swapControls(view) {
+          if (!controlMount || controlMap.size === 0) return;
+          const key = viewToControls[view] || 'global';
+          while (controlMount.firstChild) {
+            const child = controlMount.firstChild;
+            controlMount.removeChild(child);
+            if (controlTemplates) {
+              child.setAttribute('hidden', '');
+              controlTemplates.appendChild(child);
+            }
+          }
+          const node = controlMap.get(key) || controlMap.get('global');
+          if (node) {
+            node.removeAttribute('hidden');
+            controlMount.appendChild(node);
+          }
+        }
 
         function activate(view) {
           if (!host || !view) return false;
@@ -1530,6 +1562,7 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
             }
           });
           if (matched) {
+            swapControls(view);
             host.dataset.currentView = view;
             navButtons.forEach(btn => {
               btn.classList.toggle('active-nav', btn.dataset.viewTarget === view);
@@ -1582,7 +1615,7 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
   class MiniChart {
     constructor(ctx, config) {
       this.canvas = ctx && ctx.canvas ? ctx.canvas : ctx;
-      this.ctx = ctx && ctx.getContext ? ctx : (this.canvas && this.canvas.getContext ? this.canvas.getContext('2d') : null);
+      this.ctx = ctx && typeof ctx.getContext === 'function' ? ctx : (this.canvas && typeof this.canvas.getContext === 'function' ? this.canvas.getContext('2d') : null);
       this.config = config || {};
       this.type = this.config.type || 'bar';
       this.data = this.config.data || { labels: [], datasets: [] };
@@ -1591,19 +1624,100 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
       this.config.options = this.options;
       this._destroyed = false;
       this._area = { width: (this.canvas && this.canvas.width) || 0, height: (this.canvas && this.canvas.height) || 0 };
+      this._elements = [];
+      this._pixelRatio = 1;
+      this._responsive = this.options.responsive !== false;
+      this._maintainAspectRatio = !!this.options.maintainAspectRatio;
+      this._bindEvents();
       this._draw();
     }
 
-    update() {
+    update(newConfig) {
+      if (this._destroyed) return;
+      if (newConfig && typeof newConfig === 'object') {
+        Object.assign(this.config, newConfig);
+        if (newConfig.data) {
+          this.data = this.config.data || this.data;
+          this.config.data = this.data;
+        }
+        if (newConfig.options) {
+          this.options = this.config.options || this.options;
+          this.config.options = this.options;
+        }
+        if (newConfig.type) {
+          this.type = newConfig.type;
+        }
+      }
+      this._draw();
+    }
+
+    resize() {
       if (this._destroyed) return;
       this._draw();
     }
 
     destroy() {
-      if (!this.ctx || !this.canvas) return;
-      this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      if (this._destroyed) return;
+      if (this.canvas) {
+        if (this._boundMove) {
+          this.canvas.removeEventListener('mousemove', this._boundMove);
+          this.canvas.removeEventListener('touchstart', this._boundMove);
+          this.canvas.removeEventListener('touchmove', this._boundMove);
+        }
+        if (this._boundLeave) {
+          this.canvas.removeEventListener('mouseleave', this._boundLeave);
+          this.canvas.removeEventListener('touchend', this._boundLeave);
+          this.canvas.removeEventListener('touchcancel', this._boundLeave);
+        }
+      }
+      if (this._boundResize) {
+        window.removeEventListener('resize', this._boundResize);
+      }
+      if (this.ctx && this.canvas) {
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      }
+      this._hideTooltip();
       this._destroyed = true;
+    }
+
+    _bindEvents() {
+      if (!this.canvas) return;
+      this._initTooltip();
+      this._boundMove = (evt) => this._handlePointer(evt);
+      this._boundLeave = () => this._hideTooltip();
+      this.canvas.addEventListener('mousemove', this._boundMove);
+      this.canvas.addEventListener('touchstart', this._boundMove);
+      this.canvas.addEventListener('touchmove', this._boundMove);
+      this.canvas.addEventListener('mouseleave', this._boundLeave);
+      this.canvas.addEventListener('touchend', this._boundLeave);
+      this.canvas.addEventListener('touchcancel', this._boundLeave);
+      if (this._responsive) {
+        this._boundResize = () => this._draw();
+        window.addEventListener('resize', this._boundResize);
+      }
+    }
+
+    _initTooltip() {
+      if (typeof document === 'undefined') return;
+      if (!MiniChart._tooltipEl) {
+        const el = document.createElement('div');
+        el.className = 'chartjs-tooltip-lite';
+        const style = el.style;
+        style.position = 'fixed';
+        style.pointerEvents = 'none';
+        style.background = 'rgba(17, 24, 39, 0.9)';
+        style.color = '#fff';
+        style.padding = '6px 10px';
+        style.font = '12px Inter, system-ui, sans-serif';
+        style.borderRadius = '4px';
+        style.transform = 'translate(-50%, -110%)';
+        style.whiteSpace = 'nowrap';
+        style.zIndex = '2000';
+        style.display = 'none';
+        document.body.appendChild(el);
+        MiniChart._tooltipEl = el;
+      }
     }
 
     _resize() {
@@ -1636,6 +1750,12 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
           height = 300;
         }
       }
+      if (this._maintainAspectRatio && this.canvas && this.canvas.width) {
+        const aspect = this.canvas.height && this.canvas.width ? this.canvas.height / this.canvas.width : null;
+        if (aspect) {
+          height = Math.max(200, width * aspect);
+        }
+      }
       this.canvas.style.width = width + 'px';
       this.canvas.style.height = height + 'px';
       this.canvas.width = width * ratio;
@@ -1644,6 +1764,7 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
       if (ratio !== 1) {
         this.ctx.scale(ratio, ratio);
       }
+      this._pixelRatio = ratio;
       this._area = { width, height };
     }
 
@@ -1658,11 +1779,13 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
       if (!this.ctx) return;
       this._resize();
       this._clear();
+      this._elements = [];
       const labels = (this.data && this.data.labels) ? this.data.labels : [];
       const datasets = (this.data && this.data.datasets) ? this.data.datasets : [];
-      if (!labels.length && !datasets.some(ds => (ds && ds.data && ds.data.length))) {
+      if (!labels.length && !datasets.some(ds => ds && Array.isArray(ds.data) && ds.data.length)) {
         return;
       }
+      this.type = this.config.type || this.type || 'bar';
       if (this.type === 'line') {
         this._drawLine(labels, datasets);
         return;
@@ -1676,23 +1799,31 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
       }
     }
 
+    _shouldShowLegend() {
+      const plugins = this.options && this.options.plugins;
+      if (plugins && plugins.legend && plugins.legend.display === false) return false;
+      return true;
+    }
+
     _drawLegend(datasets, margin) {
-      if (!this.ctx || !datasets || !datasets.length) return;
+      if (!this.ctx || !datasets || !datasets.length || !this._shouldShowLegend()) return;
       const ctx = this.ctx;
-      const y = margin.top - 20;
+      const y = margin.top - 22;
       if (y < 12) return;
       let x = margin.left;
+      ctx.save();
       ctx.font = '12px Inter, system-ui, sans-serif';
       ctx.textBaseline = 'middle';
       datasets.forEach(ds => {
         if (!ds || !ds.label) return;
-        const colour = ds.borderColor || ds.backgroundColor || '#2563eb';
+        const colour = this._resolveColor(ds.borderColor || ds.backgroundColor, 0, '#2563eb');
         ctx.fillStyle = colour;
-        ctx.fillRect(x, y - 5, 10, 10);
+        ctx.fillRect(x, y - 6, 12, 12);
         ctx.fillStyle = '#1f2937';
-        ctx.fillText(String(ds.label), x + 14, y);
+        ctx.fillText(String(ds.label), x + 18, y);
         x += ctx.measureText(String(ds.label)).width + 40;
       });
+      ctx.restore();
     }
 
     _drawBarVertical(labels, dataset) {
@@ -1700,54 +1831,86 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
       const ctx = this.ctx;
       const width = this._area.width;
       const height = this._area.height;
-      const margin = { top: 20, right: 24, bottom: 60, left: 60 };
-      const plotWidth = Math.max(10, width - margin.left - margin.right);
-      const plotHeight = Math.max(10, height - margin.top - margin.bottom);
       const values = Array.isArray(dataset.data) ? dataset.data.map(v => Number(v) || 0) : [];
-      const maxValue = values.length ? Math.max(...values, 0) : 0;
-      const safeMax = maxValue > 0 ? maxValue : 1;
-      const barSpace = labels.length ? plotWidth / labels.length : plotWidth;
-      const barWidth = barSpace * 0.6;
+      const yOpts = this.options && this.options.scales && this.options.scales.y || {};
+      const beginAtZero = yOpts.beginAtZero !== false;
+      let maxVal = values.reduce((max, val) => Math.max(max, val), beginAtZero ? 0 : Number.NEGATIVE_INFINITY);
+      if (typeof yOpts.suggestedMax === 'number') {
+        maxVal = Math.max(maxVal, yOpts.suggestedMax);
+      }
+      if (!isFinite(maxVal) || maxVal <= 0) maxVal = 1;
+      const niceMax = this._niceCeil(maxVal);
+      const tickCount = (yOpts.ticks && yOpts.ticks.maxTicksLimit) ? Math.max(2, yOpts.ticks.maxTicksLimit) : 5;
+      const ticks = this._generateTicks(niceMax, tickCount, beginAtZero);
+      const topTick = ticks[ticks.length - 1] || niceMax;
+      const margin = { top: this._shouldShowLegend() ? 60 : 40, right: 30, bottom: 50, left: 60 };
+      const plotWidth = Math.max(20, width - margin.left - margin.right);
+      const plotHeight = Math.max(20, height - margin.top - margin.bottom);
+      const barCount = values.length || 1;
+      const step = plotWidth / barCount;
+      const barWidth = Math.max(12, step * 0.6);
+      const offset = (step - barWidth) / 2;
 
-      ctx.strokeStyle = '#d1d5db';
+      ctx.save();
+      ctx.strokeStyle = '#e5e7eb';
       ctx.lineWidth = 1;
+      ticks.forEach(tick => {
+        const y = margin.top + plotHeight - (tick / topTick) * plotHeight;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, y);
+        ctx.lineTo(margin.left + plotWidth, y);
+        ctx.stroke();
+      });
+      ctx.strokeStyle = '#9ca3af';
       ctx.beginPath();
       ctx.moveTo(margin.left, margin.top);
       ctx.lineTo(margin.left, margin.top + plotHeight);
       ctx.lineTo(margin.left + plotWidth, margin.top + plotHeight);
       ctx.stroke();
 
-      ctx.fillStyle = dataset.backgroundColor || '#3b82f6';
-      labels.forEach((label, idx) => {
-        const value = values[idx] || 0;
-        const barHeight = (Math.max(value, 0) / safeMax) * plotHeight;
-        const x = margin.left + barSpace * idx + (barSpace - barWidth) / 2;
-        const y = margin.top + plotHeight - barHeight;
-        ctx.fillStyle = dataset.backgroundColor || '#3b82f6';
-        ctx.fillRect(x, y, barWidth, barHeight);
+      ctx.font = '12px Inter, system-ui, sans-serif';
+      ctx.fillStyle = '#374151';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ticks.forEach(tick => {
+        const y = margin.top + plotHeight - (tick / topTick) * plotHeight;
+        ctx.fillText(this._formatTick(tick, yOpts), margin.left - 8, y);
       });
 
-      ctx.font = '12px Inter, system-ui, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
       labels.forEach((label, idx) => {
-        const x = margin.left + barSpace * idx + barSpace / 2;
-        ctx.fillStyle = '#1f2937';
-        ctx.fillText(String(label), x, height - margin.bottom + 8);
+        const x = margin.left + step * idx + step / 2;
+        ctx.fillText(String(label), x, margin.top + plotHeight + 8);
       });
 
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#1f2937';
-      for (let i = 0; i <= 4; i++) {
-        const value = safeMax * (i / 4);
-        const y = margin.top + plotHeight - (plotHeight * (i / 4));
-        ctx.fillText(Math.round(value).toString(), margin.left - 6, y);
-        ctx.beginPath();
-        ctx.moveTo(margin.left - 4, y);
-        ctx.lineTo(margin.left, y);
-        ctx.stroke();
-      }
+      ctx.textBaseline = 'alphabetic';
+      values.forEach((raw, idx) => {
+        const value = Math.max(Number(raw) || 0, 0);
+        const barHeight = (value / topTick) * plotHeight;
+        const x = margin.left + step * idx + offset;
+        const y = margin.top + plotHeight - barHeight;
+        const fill = this._resolveColor(dataset.backgroundColor, idx, '#3b82f6');
+        ctx.fillStyle = fill;
+        ctx.fillRect(x, y, barWidth, barHeight);
+        if (dataset.borderColor) {
+          ctx.strokeStyle = this._resolveColor(dataset.borderColor, idx, fill);
+          ctx.lineWidth = dataset.borderWidth || 1;
+          ctx.strokeRect(x, y, barWidth, barHeight);
+        }
+        this._elements.push({
+          type: 'bar',
+          dataset,
+          datasetIndex: 0,
+          index: idx,
+          label: labels[idx],
+          value,
+          rect: { x, y, width: barWidth, height: barHeight }
+        });
+      });
+
+      ctx.restore();
+      this._drawLegend([dataset], margin);
     }
 
     _drawBarHorizontal(labels, dataset) {
@@ -1755,17 +1918,37 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
       const ctx = this.ctx;
       const width = this._area.width;
       const height = this._area.height;
-      const margin = { top: 20, right: 90, bottom: 30, left: 160 };
-      const plotWidth = Math.max(10, width - margin.left - margin.right);
-      const plotHeight = Math.max(10, height - margin.top - margin.bottom);
       const values = Array.isArray(dataset.data) ? dataset.data.map(v => Number(v) || 0) : [];
-      const maxValue = values.length ? Math.max(...values, 0) : 0;
-      const safeMax = maxValue > 0 ? maxValue : 1;
-      const barSpace = labels.length ? plotHeight / labels.length : plotHeight;
-      const barHeight = barSpace * 0.6;
+      const xOpts = this.options && this.options.scales && this.options.scales.x || {};
+      const beginAtZero = xOpts.beginAtZero !== false;
+      let maxVal = values.reduce((max, val) => Math.max(max, val), beginAtZero ? 0 : Number.NEGATIVE_INFINITY);
+      if (typeof xOpts.suggestedMax === 'number') {
+        maxVal = Math.max(maxVal, xOpts.suggestedMax);
+      }
+      if (!isFinite(maxVal) || maxVal <= 0) maxVal = 1;
+      const niceMax = this._niceCeil(maxVal);
+      const tickCount = (xOpts.ticks && xOpts.ticks.maxTicksLimit) ? Math.max(2, xOpts.ticks.maxTicksLimit) : 5;
+      const ticks = this._generateTicks(niceMax, tickCount, beginAtZero);
+      const topTick = ticks[ticks.length - 1] || niceMax;
+      const margin = { top: this._shouldShowLegend() ? 60 : 40, right: 80, bottom: 45, left: 130 };
+      const plotWidth = Math.max(20, width - margin.left - margin.right);
+      const plotHeight = Math.max(20, height - margin.top - margin.bottom);
+      const barCount = values.length || 1;
+      const step = plotHeight / barCount;
+      const barHeight = Math.max(12, step * 0.6);
+      const offset = (step - barHeight) / 2;
 
-      ctx.strokeStyle = '#d1d5db';
+      ctx.save();
+      ctx.strokeStyle = '#e5e7eb';
       ctx.lineWidth = 1;
+      ticks.forEach(tick => {
+        const x = margin.left + (tick / topTick) * plotWidth;
+        ctx.beginPath();
+        ctx.moveTo(x, margin.top);
+        ctx.lineTo(x, margin.top + plotHeight);
+        ctx.stroke();
+      });
+      ctx.strokeStyle = '#9ca3af';
       ctx.beginPath();
       ctx.moveTo(margin.left, margin.top);
       ctx.lineTo(margin.left, margin.top + plotHeight);
@@ -1773,35 +1956,51 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
       ctx.stroke();
 
       ctx.font = '12px Inter, system-ui, sans-serif';
-      labels.forEach((label, idx) => {
-        const value = values[idx] || 0;
-        const barLength = (Math.max(value, 0) / safeMax) * plotWidth;
-        const y = margin.top + barSpace * idx + (barSpace - barHeight) / 2;
-        ctx.fillStyle = dataset.backgroundColor || '#3b82f6';
-        ctx.fillRect(margin.left, y, barLength, barHeight);
-
-        ctx.fillStyle = '#1f2937';
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(String(label), margin.left - 10, y + barHeight / 2);
-
-        ctx.textAlign = 'left';
-        ctx.fillText(String(value), margin.left + barLength + 8, y + barHeight / 2);
-      });
-
+      ctx.fillStyle = '#374151';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
-      ctx.fillStyle = '#1f2937';
-      const tickCount = 4;
-      for (let i = 0; i <= tickCount; i++) {
-        const value = safeMax * (i / tickCount);
-        const x = margin.left + plotWidth * (i / tickCount);
-        ctx.fillText(Math.round(value).toString(), x, margin.top + plotHeight + 6);
-        ctx.beginPath();
-        ctx.moveTo(x, margin.top + plotHeight);
-        ctx.lineTo(x, margin.top + plotHeight + 4);
-        ctx.stroke();
-      }
+      ticks.forEach(tick => {
+        const x = margin.left + (tick / topTick) * plotWidth;
+        ctx.fillText(this._formatTick(tick, xOpts), x, margin.top + plotHeight + 8);
+      });
+
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      labels.forEach((label, idx) => {
+        const y = margin.top + step * idx + step / 2;
+        ctx.fillText(String(label), margin.left - 12, y);
+      });
+
+      values.forEach((raw, idx) => {
+        const value = Math.max(Number(raw) || 0, 0);
+        const barLength = (value / topTick) * plotWidth;
+        const x = margin.left;
+        const y = margin.top + step * idx + offset;
+        const fill = this._resolveColor(dataset.backgroundColor, idx, '#3b82f6');
+        ctx.fillStyle = fill;
+        ctx.fillRect(x, y, barLength, barHeight);
+        if (dataset.borderColor) {
+          ctx.strokeStyle = this._resolveColor(dataset.borderColor, idx, fill);
+          ctx.lineWidth = dataset.borderWidth || 1;
+          ctx.strokeRect(x, y, barLength, barHeight);
+        }
+        ctx.fillStyle = '#111827';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(String(value), x + barLength + 8, y + barHeight / 2);
+        this._elements.push({
+          type: 'bar',
+          dataset,
+          datasetIndex: 0,
+          index: idx,
+          label: labels[idx],
+          value,
+          rect: { x, y, width: barLength, height: barHeight }
+        });
+      });
+
+      ctx.restore();
+      this._drawLegend([dataset], margin);
     }
 
     _drawLine(labels, datasets) {
@@ -1809,107 +2008,303 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
       const ctx = this.ctx;
       const width = this._area.width;
       const height = this._area.height;
-      const margin = { top: 50, right: 60, bottom: 50, left: 60 };
-      const plotWidth = Math.max(10, width - margin.left - margin.right);
-      const plotHeight = Math.max(10, height - margin.top - margin.bottom);
-
+      const leftOpts = this.options && this.options.scales && this.options.scales.y || {};
+      const rightOpts = this.options && this.options.scales && this.options.scales.y1 || {};
       const leftSets = datasets.filter(ds => !(ds && ds.yAxisID === 'y1'));
       const rightSets = datasets.filter(ds => ds && ds.yAxisID === 'y1');
-      const leftMax = this._maxForDatasets(leftSets) || 1;
-      const rightMax = this._maxForDatasets(rightSets) || 1;
+      const leftScale = this._buildScale(leftSets, leftOpts);
+      const rightScale = this._buildScale(rightSets, rightOpts);
+      const margin = { top: this._shouldShowLegend() ? 70 : 50, right: rightSets.length ? 70 : 40, bottom: 55, left: 70 };
+      const plotWidth = Math.max(20, width - margin.left - margin.right);
+      const plotHeight = Math.max(20, height - margin.top - margin.bottom);
+      const step = labels.length > 1 ? plotWidth / (labels.length - 1) : 0;
 
-      ctx.strokeStyle = '#d1d5db';
+      ctx.save();
+      ctx.strokeStyle = '#e5e7eb';
       ctx.lineWidth = 1;
+      leftScale.ticks.forEach(tick => {
+        const y = margin.top + plotHeight - (tick / leftScale.max) * plotHeight;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, y);
+        ctx.lineTo(margin.left + plotWidth, y);
+        ctx.stroke();
+      });
+      ctx.strokeStyle = '#9ca3af';
       ctx.beginPath();
       ctx.moveTo(margin.left, margin.top);
       ctx.lineTo(margin.left, margin.top + plotHeight);
       ctx.lineTo(margin.left + plotWidth, margin.top + plotHeight);
       ctx.stroke();
 
-      const step = labels.length > 1 ? plotWidth / (labels.length - 1) : 0;
-      const centreX = margin.left + plotWidth / 2;
-
-      datasets.forEach(ds => {
-        if (!ds || !Array.isArray(ds.data)) return;
-        const axis = ds.yAxisID === 'y1' ? 'right' : 'left';
-        const color = ds.borderColor || ds.backgroundColor || '#2563eb';
-        const max = axis === 'right' ? rightMax : leftMax;
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ds.data.forEach((value, idx) => {
-          const x = labels.length > 1 ? margin.left + step * idx : centreX;
-          const pct = max > 0 ? (Math.max(Number(value) || 0, 0) / max) : 0;
-          const y = margin.top + plotHeight - pct * plotHeight;
-          if (idx === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        });
-        ctx.stroke();
-
-        ctx.fillStyle = color;
-        ds.data.forEach((value, idx) => {
-          const x = labels.length > 1 ? margin.left + step * idx : centreX;
-          const pct = max > 0 ? (Math.max(Number(value) || 0, 0) / max) : 0;
-          const y = margin.top + plotHeight - pct * plotHeight;
-          ctx.beginPath();
-          ctx.arc(x, y, ds.pointRadius || 3, 0, Math.PI * 2);
-          ctx.fill();
-        });
-      });
-
       ctx.font = '12px Inter, system-ui, sans-serif';
-      ctx.fillStyle = '#1f2937';
+      ctx.fillStyle = '#374151';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
       labels.forEach((label, idx) => {
-        const x = labels.length > 1 ? margin.left + step * idx : centreX;
-        ctx.fillText(String(label), x, margin.top + plotHeight + 8);
+        const x = labels.length > 1 ? margin.left + step * idx : margin.left + plotWidth / 2;
+        ctx.fillText(String(label), x, margin.top + plotHeight + 10);
       });
 
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#1f2937';
-      for (let i = 0; i <= 4; i++) {
-        const value = leftMax * (i / 4);
-        const y = margin.top + plotHeight - (plotHeight * (i / 4));
-        ctx.fillText(Math.round(value).toString(), margin.left - 6, y);
-        ctx.beginPath();
-        ctx.moveTo(margin.left - 4, y);
-        ctx.lineTo(margin.left, y);
-        ctx.stroke();
-      }
-
+      leftScale.ticks.forEach(tick => {
+        const y = margin.top + plotHeight - (tick / leftScale.max) * plotHeight;
+        ctx.fillText(this._formatTick(tick, leftOpts), margin.left - 8, y);
+      });
       if (rightSets.length) {
         ctx.textAlign = 'left';
-        for (let i = 0; i <= 4; i++) {
-          const value = rightMax * (i / 4);
-          const y = margin.top + plotHeight - (plotHeight * (i / 4));
-          ctx.fillText(Math.round(value).toString(), margin.left + plotWidth + 6, y);
-          ctx.beginPath();
-          ctx.moveTo(margin.left + plotWidth, y);
-          ctx.lineTo(margin.left + plotWidth + 4, y);
-          ctx.stroke();
-        }
+        rightScale.ticks.forEach(tick => {
+          const y = margin.top + plotHeight - (tick / rightScale.max) * plotHeight;
+          ctx.fillText(this._formatTick(tick, rightOpts), margin.left + plotWidth + 8, y);
+        });
       }
 
+      datasets.forEach((ds, datasetIndex) => {
+        if (!ds || !Array.isArray(ds.data)) return;
+        const axis = ds.yAxisID === 'y1' && rightSets.length ? rightScale : leftScale;
+        const color = ds.borderColor || ds.backgroundColor || '#2563eb';
+        const tension = typeof ds.tension === 'number' ? Math.max(0, Math.min(1, ds.tension)) : 0;
+        const radius = ds.pointRadius != null ? ds.pointRadius : 3;
+        const hoverRadius = ds.pointHoverRadius != null ? ds.pointHoverRadius : Math.max(radius + 2, 5);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = ds.borderWidth || 2;
+        ctx.beginPath();
+        ds.data.forEach((value, idx) => {
+          const val = Number(value) || 0;
+          const x = labels.length > 1 ? margin.left + step * idx : margin.left + plotWidth / 2;
+          const pct = axis.max > 0 ? Math.max(val, 0) / axis.max : 0;
+          const y = margin.top + plotHeight - pct * plotHeight;
+          if (idx === 0) {
+            ctx.moveTo(x, y);
+          } else if (tension > 0) {
+            const prevX = labels.length > 1 ? margin.left + step * (idx - 1) : margin.left + plotWidth / 2;
+            const prevVal = Number(ds.data[idx - 1]) || 0;
+            const prevPct = axis.max > 0 ? Math.max(prevVal, 0) / axis.max : 0;
+            const prevY = margin.top + plotHeight - prevPct * plotHeight;
+            const cp1x = prevX + (step * tension) / 2;
+            const cp1y = prevY;
+            const cp2x = x - (step * tension) / 2;
+            const cp2y = y;
+            ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        });
+        ctx.stroke();
+
+        if (ds.fill) {
+          ctx.save();
+          ctx.globalAlpha = 0.1;
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ds.data.forEach((value, idx) => {
+            const val = Number(value) || 0;
+            const x = labels.length > 1 ? margin.left + step * idx : margin.left + plotWidth / 2;
+            const pct = axis.max > 0 ? Math.max(val, 0) / axis.max : 0;
+            const y = margin.top + plotHeight - pct * plotHeight;
+            if (idx === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          });
+          ctx.lineTo(margin.left + plotWidth, margin.top + plotHeight);
+          ctx.lineTo(margin.left, margin.top + plotHeight);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        }
+
+        ctx.fillStyle = color;
+        ds.data.forEach((value, idx) => {
+          const val = Number(value) || 0;
+          const x = labels.length > 1 ? margin.left + step * idx : margin.left + plotWidth / 2;
+          const pct = axis.max > 0 ? Math.max(val, 0) / axis.max : 0;
+          const y = margin.top + plotHeight - pct * plotHeight;
+          ctx.beginPath();
+          ctx.arc(x, y, radius, 0, Math.PI * 2);
+          ctx.fill();
+          this._elements.push({
+            type: 'point',
+            dataset: ds,
+            datasetIndex,
+            index: idx,
+            label: labels[idx],
+            value: val,
+            x,
+            y,
+            radius,
+            hitRadius: hoverRadius
+          });
+        });
+      });
+
+      ctx.restore();
       this._drawLegend(datasets, margin);
     }
 
-    _maxForDatasets(datasets) {
-      if (!datasets || !datasets.length) return 0;
-      let max = 0;
+    _buildScale(datasets, opts) {
+      const beginAtZero = opts && opts.beginAtZero !== false;
+      let maxVal = beginAtZero ? 0 : Number.NEGATIVE_INFINITY;
       datasets.forEach(ds => {
         if (!ds || !Array.isArray(ds.data)) return;
         ds.data.forEach(val => {
-          const num = Math.max(Number(val) || 0, 0);
-          if (num > max) max = num;
+          const num = Number(val) || 0;
+          if (num > maxVal) maxVal = num;
         });
       });
-      return max;
+      if (typeof opts === 'object' && typeof opts.suggestedMax === 'number') {
+        maxVal = Math.max(maxVal, opts.suggestedMax);
+      }
+      if (!isFinite(maxVal) || maxVal <= 0) maxVal = 1;
+      const niceMax = this._niceCeil(maxVal);
+      const tickCount = (opts && opts.ticks && opts.ticks.maxTicksLimit) ? Math.max(2, opts.ticks.maxTicksLimit) : 5;
+      const ticks = this._generateTicks(niceMax, tickCount, beginAtZero);
+      return { max: ticks[ticks.length - 1] || niceMax, ticks };
+    }
+
+    _formatTick(value, opts) {
+      const ticks = opts && opts.ticks;
+      if (ticks && typeof ticks.callback === 'function') {
+        try {
+          const result = ticks.callback(value);
+          if (result != null) return String(result);
+        } catch (_) {}
+      }
+      if (Math.abs(value) >= 1000 && (!ticks || ticks.precision == null)) {
+        return Math.round(value).toString();
+      }
+      return (Math.round(value * 100) / 100).toString();
+    }
+
+    _niceCeil(value) {
+      if (!isFinite(value) || value <= 0) return 1;
+      const exponent = Math.floor(Math.log10(value));
+      const fraction = value / Math.pow(10, exponent);
+      let niceFraction;
+      if (fraction <= 1) niceFraction = 1;
+      else if (fraction <= 2) niceFraction = 2;
+      else if (fraction <= 5) niceFraction = 5;
+      else niceFraction = 10;
+      return niceFraction * Math.pow(10, exponent);
+    }
+
+    _generateTicks(max, count, beginAtZero) {
+      const ticks = [];
+      if (count < 2) count = 2;
+      const step = max / (count - 1);
+      for (let i = 0; i < count; i++) {
+        ticks.push(beginAtZero ? step * i : step * i);
+      }
+      if (ticks[ticks.length - 1] < max) ticks.push(max);
+      if (beginAtZero && ticks[0] !== 0) ticks.unshift(0);
+      return ticks;
+    }
+
+    _resolveColor(value, idx, fallback) {
+      if (!value) return fallback;
+      if (typeof value === 'string') return value;
+      if (Array.isArray(value)) return value[idx % value.length] || fallback;
+      if (typeof value === 'function') {
+        try {
+          const result = value({ datasetIndex: 0, dataIndex: idx });
+          if (result) return result;
+        } catch (_) {}
+      }
+      return fallback;
+    }
+
+    _handlePointer(evt) {
+      if (!this.canvas || !this._elements.length) return;
+      let clientX;
+      let clientY;
+      if (evt.touches && evt.touches.length) {
+        clientX = evt.touches[0].clientX;
+        clientY = evt.touches[0].clientY;
+      } else {
+        clientX = evt.clientX;
+        clientY = evt.clientY;
+      }
+      if (typeof clientX !== 'number' || typeof clientY !== 'number') return;
+      const rect = this.canvas.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      const found = this._findElementAt(x, y);
+      if (found) {
+        this._showTooltip(found, clientX, clientY);
+      } else {
+        this._hideTooltip();
+      }
+    }
+
+    _findElementAt(x, y) {
+      for (let i = this._elements.length - 1; i >= 0; i--) {
+        const el = this._elements[i];
+        if (el.type === 'bar') {
+          const rect = el.rect;
+          if (!rect) continue;
+          if (x >= rect.x && x <= rect.x + rect.width && y >= rect.y && y <= rect.y + rect.height) {
+            return el;
+          }
+        } else if (el.type === 'point') {
+          const radius = el.hitRadius || el.radius || 6;
+          const dx = x - el.x;
+          const dy = y - el.y;
+          if (dx * dx + dy * dy <= radius * radius) {
+            return el;
+          }
+        }
+      }
+      return null;
+    }
+
+    _formatTooltip(el) {
+      const plugins = this.options && this.options.plugins;
+      const tooltipOpts = plugins && plugins.tooltip || {};
+      if (tooltipOpts.enabled === false) return null;
+      const dataset = el.dataset || {};
+      const context = {
+        chart: this,
+        label: dataset.label || el.label || '',
+        dataIndex: el.index,
+        datasetIndex: el.datasetIndex,
+        raw: el.value,
+        parsed: el.value
+      };
+      if (tooltipOpts.callbacks && typeof tooltipOpts.callbacks.label === 'function') {
+        try {
+          const result = tooltipOpts.callbacks.label(context);
+          if (result != null) return String(result);
+        } catch (_) {}
+      }
+      const label = dataset.label || el.label;
+      if (label) return label + ': ' + el.value;
+      return String(el.value);
+    }
+
+    _showTooltip(el, pageX, pageY) {
+      const text = this._formatTooltip(el);
+      if (!text) {
+        this._hideTooltip();
+        return;
+      }
+      const tooltip = MiniChart._tooltipEl;
+      if (!tooltip) return;
+      tooltip.textContent = text;
+      tooltip.style.display = 'block';
+      tooltip.style.left = pageX + 'px';
+      tooltip.style.top = (pageY - 12) + 'px';
+    }
+
+    _hideTooltip() {
+      const tooltip = MiniChart._tooltipEl;
+      if (tooltip) {
+        tooltip.style.display = 'none';
+      }
     }
   }
 
+  MiniChart._tooltipEl = MiniChart._tooltipEl || null;
+
   globalObj.Chart = MiniChart;
+  MiniChart.version = 'lite-2.0';
 })();
 
 // app.js
