@@ -3248,6 +3248,39 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
     state.hiddenShows = {};
     // Also reset undo stack
     state.undoStack = [];
+    // When multi-date schedules are enabled ensure every stored date is reset
+    // as well. The legacy single-page build only tracked a single set of
+    // rows, so clearing times implicitly wiped the entire schedule. In the
+    // unified build we mirror that behaviour by traversing scheduleByDate
+    // and blanking each entry so that stale shows do not linger in the
+    // start-time order panel after the grid is cleared.
+    if (state.scheduleByDate && typeof state.scheduleByDate === 'object') {
+      Object.keys(state.scheduleByDate).forEach((dateKey) => {
+        const entry = state.scheduleByDate[dateKey] || {};
+        const clearedPrime = Array.isArray(entry.primeRows)
+          ? entry.primeRows.map(row => ({ ...row, primeHM: '' }))
+          : [];
+        const clearedExtra = Array.isArray(entry.extraRows)
+          ? entry.extraRows.map(row => ({ ...row, primeHM: '' }))
+          : [];
+        state.scheduleByDate[dateKey] = {
+          primeRows: clearedPrime,
+          extraRows: clearedExtra,
+          manualShows: [],
+          overrides: {},
+          hiddenShows: {},
+          undoStack: [],
+        };
+        if (state.currentDate && dateKey === state.currentDate) {
+          state.primeRows = clearedPrime;
+          state.extraRows = clearedExtra;
+          state.manualShows = [];
+          state.overrides = {};
+          state.hiddenShows = {};
+          state.undoStack = [];
+        }
+      });
+    }
     save();
   }
 
@@ -3929,6 +3962,12 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
       if (!highlightId) {
         document.querySelectorAll('[data-filmid]').forEach(el => {
           el.classList.remove('film-highlight');
+          if (el.dataset.role === 'gantt-bar') {
+            el.classList.remove('text-black');
+            if (!el.classList.contains('bg-purple-50')) {
+              el.classList.add('text-white');
+            }
+          }
         });
         return;
       }
@@ -3961,8 +4000,16 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
         const t = f2 && f2.title ? f2.title.toLowerCase().trim() : '';
         if (t && t === highlightTitle) {
           el.classList.add('film-highlight');
+          if (el.dataset.role === 'gantt-bar') {
+            el.classList.remove('text-white');
+            el.classList.add('text-black');
+          }
         } else {
           el.classList.remove('film-highlight');
+          if (el.dataset.role === 'gantt-bar' && !el.classList.contains('bg-purple-50')) {
+            el.classList.remove('text-black');
+            el.classList.add('text-white');
+          }
         }
       });
     } catch (err) {}
@@ -8259,6 +8306,7 @@ if (document.readyState === 'loading') {
         }
         bar.dataset.id = rec.id;
         bar.dataset.audid = rec.audId;
+        bar.dataset.role = 'gantt-bar';
         bar.style.cursor = 'pointer';
         // Content: start time and film title
         const startSpan = document.createElement('span');
@@ -8273,7 +8321,7 @@ if (document.readyState === 'loading') {
         // highlight so the selected show stands out.  The grad-bar class is
         // removed here and restored when the bar is deselected.
         if (rec.id === activeShowId) {
-          bar.classList.remove('grad-bar');
+          bar.classList.remove('grad-bar','text-white');
           bar.classList.add('ring-2','ring-purple-400','bg-purple-50','text-black');
         }
 
@@ -8287,6 +8335,7 @@ if (document.readyState === 'loading') {
           const highlightId = ShowtimeState.state && ShowtimeState.state.highlightFilmId;
           if (highlightId && rec.filmId && String(rec.filmId) === String(highlightId)) {
             bar.classList.add('film-highlight');
+            bar.classList.remove('text-white');
             bar.classList.add('text-black');
           }
         } catch (_) {
@@ -8434,12 +8483,14 @@ if (document.readyState === 'loading') {
     if (conflict) {
       dragState.bar.classList.add('bg-red-500');
       dragState.bar.classList.remove('grad-bar','bg-purple-50','ring-2','ring-purple-400','text-black');
+      dragState.bar.classList.add('text-white');
     } else {
       // Reset classes to default gradient when not active or conflicting
       dragState.bar.classList.remove('bg-red-500');
       // Only add gradient if this bar is not the active show; highlight will be applied in onPointerUp or on click
       dragState.bar.classList.add('grad-bar');
       dragState.bar.classList.remove('bg-purple-50','ring-2','ring-purple-400','text-black');
+      dragState.bar.classList.add('text-white');
     }
   }
   // Finalize drag: commit changes and clean up
