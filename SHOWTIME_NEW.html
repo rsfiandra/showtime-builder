@@ -410,9 +410,6 @@ button{font-family:inherit;}
 .text-[0.625rem] {font-size:0.625rem;line-height:1rem;}
 .text-[0.65rem] {font-size:0.65rem;line-height:1rem;}
 .text-[10px] {font-size:10px;line-height:1rem;}
-.nav-link {padding-left:1rem;padding-right:1rem;padding-top:0.5rem;padding-bottom:0.5rem;border-radius:0.5rem;font-size:0.875rem;font-weight:500;display:inline-block;background:transparent;border:none;color:inherit;cursor:pointer;}
-.nav-link:focus-visible {outline:2px solid rgba(255,255,255,0.7);outline-offset:2px;}
-.nav-link.active-nav {background-color:rgba(255,255,255,0.2);}
 .summary-bar-wrapper {display:flex;flex-direction:column;align-items:flex-end;gap:0.25rem;}
 .summary-bar-value {font-weight:600;font-size:0.85rem;}
 .summary-bar-track {width:100%;height:0.5rem;background-color:#e5e7eb;border-radius:9999px;overflow:hidden;}
@@ -478,6 +475,49 @@ button{font-family:inherit;}
   min-width: 8rem;
   text-align: center;
 }
+
+/* Recreate the glossy indigo nudge buttons from the original app.  The base
+   class defines the pill shape, gradient fill and white arrow contrast, while
+   the compact modifier shrinks the control for table rows. */
+.nudge-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  min-height: 1.75rem;
+  padding: 0;
+  border-radius: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1;
+  background-image: linear-gradient(to bottom, #6366f1, #4338ca);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 -1px 0 rgba(15, 23, 42, 0.3), 0 2px 6px rgba(15, 23, 42, 0.25);
+  transition: transform 120ms ease, box-shadow 120ms ease, background-image 120ms ease;
+}
+
+.nudge-btn:hover {
+  background-image: linear-gradient(to bottom, #818cf8, #4f46e5);
+  box-shadow: inset 0 -1px 0 rgba(15, 23, 42, 0.25), 0 3px 8px rgba(15, 23, 42, 0.3);
+}
+
+.nudge-btn:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 3px rgba(15, 23, 42, 0.35);
+}
+
+.nudge-btn:focus-visible {
+  outline: 2px solid rgba(129, 140, 248, 0.9);
+  outline-offset: 2px;
+}
+
+.nudge-btn--compact {
+  min-width: 1.5rem;
+  min-height: 1.5rem;
+  font-size: 0.75rem;
+  border-radius: 0.5rem;
+}
 :root {
   /* Default brand colours: darkened blue and indigo tones for a more
      subdued, richer look.  These values can still be overridden by
@@ -535,14 +575,6 @@ button{font-family:inherit;}
   align-items: flex-start;
 }
 
-/* When a navigation bar uses the grad-nav class, make nav links inherit the text
-   colour from the parent.  This ensures the links remain visible on top of the
-   gradient background.  Hover styles defined in the HTML (e.g. hover:bg-blue-600)
-   still apply but will use the inherited white text. */
-.grad-nav .nav-link {
-  color: inherit;
-}
-
 /* Apply the selected gradient colours to the navigation bar.  This allows the
    theme swatch to colour the nav header just like the table headers.  The
    nav inherits the global text colour (white) so links remain legible. */
@@ -577,7 +609,46 @@ button{font-family:inherit;}
   border-radius: 0.5rem;
   font-size: 0.875rem;
   font-weight: 500;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: transparent;
+  border: 1px solid transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease, box-shadow 150ms ease, transform 120ms ease;
+}
+
+.nav-link:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 2px;
+}
+
+.nav-link:hover,
+.nav-link:focus-visible {
+  background-color: rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+.nav-link:active {
+  background-color: rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  transform: translateY(1px);
+}
+
+.grad-nav .nav-link {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.nav-link.active-nav {
+  background-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45), 0 6px 12px rgba(15, 23, 42, 0.18);
+}
+
+.nav-link.active-nav:hover {
+  background-color: rgba(255, 255, 255, 0.28);
 }
 
 /* Keep the group of navigation links on a single row.  This prevents
@@ -1022,18 +1093,17 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
   <nav class="nav-wrap grad-nav px-4 py-3">
     <!-- First row: navigation links.  These anchors remain on a single line. -->
     <div class="nav-links flex flex-nowrap items-center gap-2">
-      <button type="button" class="nav-link hover:bg-blue-700" data-view-target="home">Home</button>
-      <button type="button" class="nav-link hover:bg-blue-700" data-view-target="auditoriums" data-fallback-href="aud.html">Auditoriums</button>
-      <button type="button" class="nav-link hover:bg-blue-700" data-view-target="bookings" data-fallback-href="bookings.html">Bookings</button>
-      <button type="button" class="nav-link hover:bg-blue-700" data-view-target="prime" data-fallback-href="prime.html">Prime</button>
+      <button type="button" class="nav-link" data-view-target="home">Home</button>
+      <button type="button" class="nav-link" data-view-target="auditoriums" data-fallback-href="aud.html">Auditoriums</button>
+      <button type="button" class="nav-link" data-view-target="bookings" data-fallback-href="bookings.html">Bookings</button>
+      <button type="button" class="nav-link" data-view-target="prime" data-fallback-href="prime.html">Prime</button>
       <!-- Rename the grid tab to Schedule and add a Gantt tab -->
-      <button type="button" class="nav-link hover:bg-blue-700" data-view-target="schedule" data-fallback-href="schedule-grid.html">Schedule</button>
-      <button type="button" class="nav-link hover:bg-blue-700" data-view-target="order" data-fallback-href="order.html">Order</button>
-      <button type="button" class="nav-link hover:bg-blue-700" data-view-target="gantt" data-fallback-href="gantt.html">Gantt</button>
+      <button type="button" class="nav-link" data-view-target="schedule" data-fallback-href="schedule-grid.html">Schedule</button>
+      <button type="button" class="nav-link" data-view-target="gantt" data-fallback-href="gantt.html">Gantt</button>
       <!-- Dashboard tab: show charts summarising schedules -->
-      <button type="button" class="nav-link hover:bg-blue-700" data-view-target="dashboard" data-fallback-href="dashboard.html">Dashboard</button>
+      <button type="button" class="nav-link" data-view-target="dashboard" data-fallback-href="dashboard.html">Dashboard</button>
       <!-- Removed separate Data tab; its functionality is now part of the Home page -->
-      <button type="button" class="nav-link hover:bg-blue-700" data-view-target="audit" data-fallback-href="audit.html">Audit</button>
+      <button type="button" class="nav-link" data-view-target="audit" data-fallback-href="audit.html">Audit</button>
     </div>
     <!-- Second row: controls.  Include a placeholder to reserve space for the
          film highlight dropdown even though the home page hides it.  Wrap
@@ -1167,7 +1237,7 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
           <li><strong>Bookings</strong>: Assign films to slots for the current week.</li>
           <li><strong>Prime</strong>: Choose prime times and build cycles for each booking.</li>
           <li><strong>Schedule</strong>: Interactive grid to adjust individual show times, add manual shows and view the schedule.</li>
-          <li><strong>Order</strong>: View all shows sorted by start time and nudge their start earlier or later in 5‑minute increments.</li>
+          <li><strong>Start‑Time Order panel</strong>: Toggle from the header to view all shows sorted by start time and nudge their start earlier or later in 5‑minute increments.</li>
           <li><strong>Gantt</strong>: Visual timeline by auditorium to view and drag shows horizontally to adjust start times or vertically to change auditoriums.</li>
           <li><strong>Audit</strong>: View static reports such as the schedule by film title with gaps between shows.</li>
         </ul>
@@ -1610,7 +1680,13 @@ body.sg-condensed .card-table.dense-schedule td.navcell > div {
             swapControls(view);
             host.dataset.currentView = view;
             navButtons.forEach(btn => {
-              btn.classList.toggle('active-nav', btn.dataset.viewTarget === view);
+              const isActive = btn.dataset.viewTarget === view;
+              btn.classList.toggle('active-nav', isActive);
+              if (isActive) {
+                btn.setAttribute('aria-current', 'page');
+              } else {
+                btn.removeAttribute('aria-current');
+              }
             });
             try {
               window.dispatchEvent(new CustomEvent('showtimeViewActivated', { detail: { view } }));
@@ -7680,8 +7756,8 @@ function initOrderView() {
       tdNudge.className = 'px-2 py-1';
       // Up button
       const btnUp = document.createElement('button');
-      // Use a smaller rounded radius to more closely match the older design
-      btnUp.className = 'inline-flex items-center border rounded-md px-2 py-0.5 mr-1 bg-white hover:bg-gray-50 shadow-sm';
+      // Use the glossy indigo nudge styling shared with the order panel
+      btnUp.className = 'nudge-btn nudge-btn--compact mr-1';
       btnUp.textContent = '▲';
       btnUp.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -7689,7 +7765,7 @@ function initOrderView() {
       });
       // Down button
       const btnDown = document.createElement('button');
-      btnDown.className = 'inline-flex items-center border rounded-md px-2 py-0.5 bg-white hover:bg-gray-50 shadow-sm';
+      btnDown.className = 'nudge-btn nudge-btn--compact';
       btnDown.textContent = '▼';
       btnDown.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -10274,15 +10350,11 @@ if (document.readyState === 'loading') {
     // Create the header nudge buttons but do not attach handlers yet.  We
     // assign them to the declared variables so they are accessible later.
     headerNudgeUpBtn = document.createElement('button');
-    // Style header-level nudge buttons with a dark text colour so the ▲/▼ icons
-    // are visible against the white background even when the parent header
-    // inherits a white font colour. Without an explicit text colour, the
-    // buttons inherit the header’s white font colour and the arrows become
-    // invisible on the white button background (see issue reported by user).
-    headerNudgeUpBtn.className = 'inline-flex items-center border rounded-lg px-2 py-0.5 bg-white hover:bg-gray-50 shadow-sm text-sm text-gray-700';
+    // Apply the shared glossy nudge styling so the header controls match the row buttons
+    headerNudgeUpBtn.className = 'nudge-btn';
     headerNudgeUpBtn.textContent = '▲';
     headerNudgeDownBtn = document.createElement('button');
-    headerNudgeDownBtn.className = 'inline-flex items-center border rounded-lg px-2 py-0.5 bg-white hover:bg-gray-50 shadow-sm text-sm text-gray-700';
+    headerNudgeDownBtn.className = 'nudge-btn';
     headerNudgeDownBtn.textContent = '▼';
     // Append buttons to the header button group
     headerButtons.appendChild(headerNudgeUpBtn);
@@ -10626,15 +10698,15 @@ if (document.readyState === 'loading') {
         const tdNudge = document.createElement('td');
         tdNudge.className = 'px-3 py-1';
         const btnUp = document.createElement('button');
-        // Increase the corner radius for nudge buttons to match other button styles
-        btnUp.className = 'inline-flex items-center border rounded-lg px-2 py-0.5 mr-1 bg-white hover:bg-gray-50 shadow-sm';
+        // Apply the shared glossy styling used across the order controls
+        btnUp.className = 'nudge-btn nudge-btn--compact mr-1';
         btnUp.textContent = '▲';
         btnUp.addEventListener('click', (e) => {
           e.stopPropagation();
           nudgeShow(rec, -1);
         });
         const btnDown = document.createElement('button');
-        btnDown.className = 'inline-flex items-center border rounded-lg px-2 py-0.5 bg-white hover:bg-gray-50 shadow-sm';
+        btnDown.className = 'nudge-btn nudge-btn--compact';
         btnDown.textContent = '▼';
         btnDown.addEventListener('click', (e) => {
           e.stopPropagation();
